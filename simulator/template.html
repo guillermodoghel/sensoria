@@ -364,7 +364,7 @@ function fadeToBlack(s,amt){const f=1-amt/255;for(let i=0;i<s.len;i++){const k=i
 function blend(a,b,amt){amt=clamp(amt,0,255)/255;return [a[0]+(b[0]-a[0])*amt,a[1]+(b[1]-a[1])*amt,a[2]+(b[2]-a[2])*amt];}
 function scale(c,b){b=clamp(b,0,255)/255;return [c[0]*b,c[1]*b,c[2]*b];}
 function cpal(s,index,bri=255){index=((Math.round(index)%256)+256)%256;const p=s.palArr;const hi=index>>4,lo=index&15;const a=p[hi],b=p[(hi+1)&15];const t=lo/16;return scale([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t],bri);}
-function blur(s,amt){const k=amt/255/2;let prev=[0,0,0];for(let i=0;i<s.len;i++){const c=getPx(s,i);const part=scale(c,k*255);const keep=[c[0]-part[0]+prev[0],c[1]-part[1]+prev[1],c[2]-part[2]+prev[2]];setPx(s,i,keep);if(i>0){const p=getPx(s,i-1);setPx(s,i-1,[p[0]+part[0],p[1]+part[1],p[2]+part[2]]);}prev=part;}}
+function blur(s,amt){const k=amt/255/2, stay=1-amt/255;let prev=[0,0,0];for(let i=0;i<s.len;i++){const c=getPx(s,i);const part=scale(c,k*255);const keep=[c[0]*stay+prev[0],c[1]*stay+prev[1],c[2]*stay+prev[2]];setPx(s,i,keep);if(i>0){const p=getPx(s,i-1);setPx(s,i-1,[p[0]+part[0],p[1]+part[1],p[2]+part[2]]);}prev=part;}}
 const logF=f=>Math.log10(Math.max(f,1));
 const MAXLOG=Math.log10(10240);
 const GRAY=[128,128,128];
