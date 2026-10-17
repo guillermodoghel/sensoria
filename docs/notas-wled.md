@@ -8,7 +8,7 @@
 
 ## Efectos
 - **`fade_out` y el color 2:** el fade va hacia `col[1]`. Si `col[1]` es un color, el segmento entero se llena de ese color. Dejarlo en negro.
-- **Segmentos superpuestos:** funcionan. El segmento de id más alto se dibuja arriba, y con `o2` (overlay) Two Dots no pinta el fondo. Así se hacen los "puntitos" sobre un efecto de audio.
+- **Segmentos superpuestos:** funcionan, y todos dibujan sobre el mismo buffer en orden de id. Un efecto que hace fade sobre lo que hay (Plasmoid) puede ir arriba de otro que pinta todo (Strobe) sin taparlo; al revés sí lo tapa. El segmento de id más alto se dibuja arriba, y con `o2` (overlay) Two Dots no pinta el fondo. Así se hacen los "puntitos" sobre un efecto de audio.
 - **Two Dots:** pone dos puntos opuestos en el anillo. El color 1 y el color 2 son los puntos; si el color 2 es igual al color 3, los dos puntos salen con el color 1. El fondo es el color 3. `ix` es el tamaño.
 - **Gravcentric:** la punta es gris (casi blanco). **Waterfall:** en cada pico pinta `CHSV(92,92,92)`, un verde pálido. Ninguno de los dos respeta la regla de colores.
 - **Noisemeter y Gravcenter:** dependen de dónde arranca la tira. En anillos colgados al azar se ven como manchas en lugares random.

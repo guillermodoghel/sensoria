@@ -131,6 +131,11 @@ color = "blanco"
 grandes = { fx = "Strobe", sx = [190, 140, 70] }
 chicos = { fx = "Strobe", sx = [170, 110, 40] }
 diana = { fx = "Strobe", sx = [160, 100, 50, 20] }
+# Fondo audio-rítmico en los segmentos de overlay (10-19), que se dibujan DESPUÉS del strobo: Plasmoid oscurece apenas
+# lo que ya hay (fadeToBlackBy 32) y suma el plasma, así el destello blanco se sigue viendo y entre destellos late el plasma.
+# Al revés no anda: el strobo, cuando está apagado, pinta su anillo de negro y taparía el fondo.
+puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
+puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
 
 [[look]]
 id = 1
