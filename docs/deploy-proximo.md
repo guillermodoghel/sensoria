@@ -16,7 +16,7 @@ python3 tools/sensoria.py status
 
 ## Después
 1. **Cargar el preset 1 "Test anillos"** y comprobar que cada anillo prende de su color:
-   - **ORBITAS:** A-XL rojo, B-XL magenta, B-L amarillo, A-M verde, A-XS azul, B-S celeste.
+   - **ORBE:** A-XL rojo, B-XL magenta, B-L amarillo, A-M verde, A-XS azul, B-S celeste.
    - **DIANA:** D1 rojo, D2 verde, D3 azul, D4 magenta, del centro hacia afuera.
 
    Si alguno no coincide, corregir `setup.toml` (orden o pin) y volver a hacer el push.

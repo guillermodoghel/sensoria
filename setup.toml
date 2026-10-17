@@ -46,9 +46,9 @@ abl_ma = 5000                   # repartido por anillo, ver [[anillo]] abl_ma
 
 # ---------------------------------------------------------------- anillos
 # Orden = orden de los LEDs en la tira virtual de ORBITAS A (1104 LEDs).
-# ORBITAS: 6 anillos colgados como un giroscopio desprolijo (los dos XL cruzados; el resto en cualquier ángulo),
+# ORBE: los 6 anillos colgados como un giroscopio desprolijo (controladores ORBITAS A y B) (los dos XL cruzados; el resto en cualquier ángulo),
 # por eso los looks no deben depender de la orientación ni de dónde arranca cada tira.
-# Grupos: GRANDES = A-XL, B-XL, B-L · CHICOS = A-M, A-XS, B-S · DIANA = D1 (centro) .. D4 (afuera).
+# Grupos: GRANDES = A-XL, B-XL, B-L · CHICOS = A-M, A-XS, B-S (juntos = ORBE) · DIANA = D1 (centro) .. D4 (afuera).
 
 [[anillo]]
 seg = 0
@@ -134,7 +134,7 @@ pin = 12
 grupo = "diana"
 abl_ma = 2000
 
-# Segmentos de "puntitos" (overlay sobre cada anillo): ORBITAS = 10..15, DIANA = 16..19.
+# Segmentos de "puntitos" (overlay sobre cada anillo): ORBE = 10..15, DIANA = 16..19.
 [segmentos]
 puntitos_orbitas = 10
 puntitos_diana = 16
@@ -156,6 +156,7 @@ celeste = [0, 255, 255]
 magenta = [255, 0, 255]
 amarillo = [255, 255, 0]
 negro = [0, 0, 0]
+blanco = [255, 255, 255]   # solo para el strobo: ilumina mucho
 
 # Paletas custom (se suben como palette0.json, palette1.json, … → ids 255, 254, …). Cortes duros, sin degradé.
 [[paleta]]

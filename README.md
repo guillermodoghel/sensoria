@@ -1,6 +1,6 @@
 # SENSORIA
 
-Instalación de luz audio-reactiva: **ORBITAS**, seis anillos LED colgados como un giroscopio, y **DIANA**, cuatro anillos concéntricos. Todo lo maneja WLED en tres controladores Gledopto ESP32.
+Instalación de luz audio-reactiva: el **ORBE**, seis anillos LED colgados como un giroscopio y manejados por los controladores ORBITAS A y ORBITAS B, y la **DIANA**, cuatro anillos concéntricos. Todo lo maneja WLED en tres controladores Gledopto ESP32.
 
 Este repo es la fuente de verdad del setup: hardware, red, looks (presets), paletas y config de audio están en archivos de texto. `tools/sensoria.py` los compila y los sube a los controladores. También hace backups y arma un simulador 3D.
 
@@ -14,7 +14,7 @@ Este repo es la fuente de verdad del setup: hardware, red, looks (presets), pale
 
 ORBITAS A arma una tira virtual de 1104 LEDs (A, después B, después DIANA) y manda por DDP la parte de B y de DIANA. B y DIANA no tienen presets propios.
 
-**Grupos que usan los looks:**
+**Grupos que usan los looks** (GRANDES + CHICOS = ORBE):
 - **GRANDES:** A-XL, B-XL y B-L. Los dos XL son los que se cruzan.
 - **CHICOS:** A-M, A-XS y B-S.
 - **DIANA:** D1 a D4, del centro hacia afuera.
@@ -26,7 +26,7 @@ Detalle de nombres, segmentos e IDs en [docs/naming.md](docs/naming.md).
 - **Solo colores puros:** rojo, verde, azul, celeste, magenta, amarillo, con cada canal en 0 o 255. Las mezclas se ven lavadas o blancas en estas tiras.
 - **Fondo negro:** el color 2 de cada segmento va en negro, porque muchos efectos de WLED hacen el fade hacia ese color.
 - **Poco blanco y poco flash:** ilumina demasiado el lugar. Evitar Gravcentric (deja un punto gris en la punta), Waterfall (verde pálido en cada golpe), Puddles y DJ Light.
-- **ORBITAS no depende de la orientación:** los anillos cuelgan en cualquier ángulo y cada tira arranca en un punto distinto. Usar texturas (Plasmoid, Noisemove), puntos que recorren el anillo (Juggles, Freqpixels, Ripple Peak) y "puntitos" orbitando.
+- **El ORBE no depende de la orientación:** los anillos cuelgan en cualquier ángulo y cada tira arranca en un punto distinto. Usar texturas (Plasmoid, Noisemove), puntos que recorren el anillo (Juggles, Freqpixels, Ripple Peak) y "puntitos" orbitando.
 - **DIANA resalta los círculos:** un segmento por anillo. Cada círculo se cierra con el volumen (el centro es el más sensible), o los anillos alternan colores, o llevan puntitos girando.
 - **Micrófono con los defaults de WLED:** squelch 10, ganancia 60, AGC normal. Con AGC "vivid" y ganancia 160 saturaba todo.
 

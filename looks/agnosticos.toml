@@ -1,12 +1,12 @@
 # Looks "agnósticos" (propuesta 2026-10-17).
-# ORBITAS: nada depende de la orientación de los anillos ni de dónde arranca cada tira
+# ORBE: nada depende de la orientación de los anillos ni de dónde arranca cada tira
 #   (texturas, puntos que recorren el anillo, puntitos orbitando). Sin Gravcentric (punta gris) ni Waterfall (verde pálido).
 # DIANA: efectos que resaltan los 4 círculos concéntricos, un segmento por anillo (D1 centro .. D4 afuera).
 #   Ninguno depende de dónde arranca cada tira (nada de Gravcenter/Noisemeter, que crecen en U o en arco desde un punto).
 #   Los anillos alternan dos colores para que siempre se lean los 4 círculos.
 #   textura  = Plasmoid
 #   ruido    = Noisemove (puntos que se mueven por todo el círculo) · chispas = Freqpixels · ondas = Ripple Peak · blur = Blurz
-#   puntitos = fondo suave + dos puntitos girando en cada anillo, como en las órbitas
+#   puntitos = fondo suave + dos puntitos girando en cada anillo, como en el ORBE
 #
 # Valores: un escalar vale para todo el grupo; una lista da un valor por anillo en orden
 #   grandes = A-XL, B-XL, B-L · chicos = A-M, A-XS, B-S · diana = D1..D4 · puntitos = A-XL, A-M, A-XS, B-S, B-XL, B-L
@@ -57,7 +57,7 @@ paleta = "rojo-azul"
 color = "rojo"
 grandes = { fx = "Ripple Peak", sx = 128, ix = 64 }
 chicos = { fx = "Ripple Peak", sx = 128, ix = 64 }
-diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80] }   # mismas ondas que las órbitas; más ondas hacia afuera
+diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80] }   # mismas ondas que el ORBE; más ondas hacia afuera
 
 [[look]]
 id = 15
@@ -77,7 +77,7 @@ paleta = "rojo-magenta"
 color = "rojo"
 grandes = { fx = "Noisemove", sx = 140, ix = 255 }
 chicos = { fx = "Noisemove", sx = 170, ix = 255 }
-diana = { fx = "Noisemove", sx = [200, 170, 140, 110], ix = 255, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }   # los mismos puntos de ruido que las órbitas
+diana = { fx = "Noisemove", sx = [200, 170, 140, 110], ix = 255, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }   # los mismos puntos de ruido que el ORBE
 
 [[look]]
 id = 17
@@ -120,6 +120,18 @@ color = ["azul", "celeste", "azul"]
 grandes = { fx = "Gravcenter", sx = 160, ix = 150 }
 chicos = { fx = ["Puddlepeak", "Ripple Peak", "Puddlepeak"], sx = 160, ix = 150, c1 = 8 }
 diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80], paleta = "color1", colores = ["azul", "celeste", "azul", "celeste"] }
+
+[[look]]
+id = 23
+nombre = "Strobo"
+playlist = false
+paleta = "color1"
+color = "blanco"
+# Cada anillo es un strobo con su propio período ((255 - sx) * 20 ms: 1.3 s … 4.7 s, todos distintos), así los destellos
+# caen de a un anillo entero por vez en un orden que parece al azar (~3 por segundo en total). No sigue el ritmo.
+grandes = { fx = "Strobe", sx = [190, 140, 70] }
+chicos = { fx = "Strobe", sx = [170, 110, 40] }
+diana = { fx = "Strobe", sx = [160, 100, 50, 20] }
 
 [[look]]
 id = 1
