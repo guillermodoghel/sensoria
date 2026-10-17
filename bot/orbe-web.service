@@ -1,0 +1,15 @@
+[Unit]
+Description=SENSORIA vista en vivo (simulador + api/state de SUB ORBE A)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=-/etc/orbe-bot.env
+Environment=WEB_ROOT=/opt/orbe-bot/vista
+ExecStart=/usr/bin/python3 /opt/orbe-bot/orbe_web.py
+Restart=always
+RestartSec=5
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target

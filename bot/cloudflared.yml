@@ -1,0 +1,6 @@
+tunnel: a30e6410-27b2-4c5a-a0f3-8368e1756a90
+credentials-file: /etc/cloudflared/a30e6410-27b2-4c5a-a0f3-8368e1756a90.json
+ingress:
+  - hostname: orbe.doghel.com.ar
+    service: http://localhost:8080
+  - service: http_status:404

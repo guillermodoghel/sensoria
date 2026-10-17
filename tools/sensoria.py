@@ -241,12 +241,14 @@ def build_simulator(comp, presets, setup, preview=()):
     html = (ROOT / "simulator/template.html").read_text()
     html = html.replace("__PRESETS__", json.dumps(sim, separators=(",", ":"))).replace("__PLAYLIST__", json.dumps(pl))
     out = BUILD / "simulador.html"
-    out.write_text(html)
-    local = BUILD / "simulador-local" / "index.html"
-    local.parent.mkdir(exist_ok=True)
-    local.write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" '
-                     'content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}'
-                     'body{margin:0}</style></head><body>\n' + html + "\n</body></html>\n")
+    out.write_text(html.replace("__LIVE__", "false"))
+    page = ('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" '
+            'content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}'
+            'body{margin:0}</style></head><body>\n{}\n</body></html>\n')
+    # simulador-local: the full simulator served locally; vista: the live view served by bot/orbe_web.py on the Pi
+    for name, live in (("simulador-local", "false"), ("vista", "true")):
+        (BUILD / name).mkdir(exist_ok=True)
+        (BUILD / name / "index.html").write_text(page.replace("{}", html.replace("__LIVE__", live)))
     return out
 
 

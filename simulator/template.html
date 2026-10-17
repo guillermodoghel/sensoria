@@ -78,6 +78,18 @@ textarea{width:100%;min-height:90px;resize:vertical;font-family:var(--f-mono);fo
   .power{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Live view (vista en vivo): stage only, mirrors the work's state */
+.app.live{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);height:100%}
+.app.live .stage{height:100%}
+.app.live .rack{display:none}
+.livebadge{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em}
+.livebadge.ok{color:var(--ok)}
+.livebadge.off{color:var(--accent)}
+.livecta{pointer-events:auto;font-size:13px;color:var(--muted)}
+.livecta a{color:var(--cyan)}
+.offline{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;padding:16px}
+.offline strong{display:block;font-family:var(--f-display);font-size:22px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.offline span{color:var(--muted);font-size:13px}
 </style>
 
 <div class="app">
@@ -86,7 +98,10 @@ textarea{width:100%;min-height:90px;resize:vertical;font-family:var(--f-mono);fo
     <div class="hud">
       <div class="brand">Sensoria <b>Sim</b></div>
       <div class="now">preset <strong id="nowName">—</strong> · <span id="nowAudio">señal simulada (sin sonido)</span></div>
+      <div class="livebadge" id="liveBadge" hidden></div>
+      <div class="livecta" id="liveCta" hidden>Manejala desde Telegram: <a href="https://t.me/orbe_sensorial_bot" target="_blank" rel="noopener">@orbe_sensorial_bot</a> · el audio de esta vista es simulado</div>
     </div>
+    <div class="offline" id="offline" hidden><div><strong>Sin conexión</strong><span>No encuentro la obra. Reintentando…</span></div></div>
     <div class="viewbtns">
       <button id="btnSpin" title="Girar la cámara">Girar</button>
       <button id="btnReset" title="Volver a la vista inicial">Vista</button>
@@ -172,6 +187,7 @@ textarea{width:100%;min-height:90px;resize:vertical;font-family:var(--f-mono);fo
 "use strict";
 const PRESETS = __PRESETS__;
 const PLAYLIST = __PLAYLIST__;
+const LIVE = __LIVE__;   // true in the live view: the state comes from api/state instead of the preset buttons
 const TOTAL = 1104, FPS = 42, FRAMETIME = 1000/FPS;
 
 /* ---------- physical layout ---------- */
@@ -671,5 +687,37 @@ function frame(t){
   if(ticked){meterT+=dt;const bars=$('geq').children;for(let i=0;i<16;i++)bars[i].style.height=(2+S.fft[i]/255*44)+"px";$('volBar').style.height=(S.vol/255*100)+"%";$('peakDot').classList.toggle('on',S.peak||NOW-lastPeak<90);}
   controls.update(); renderer.render(scene,camera); requestAnimationFrame(frame);
 }
-initUI(); loadPreset(15); requestAnimationFrame(frame);
+/* ---------- live view: mirror SUB ORBE A's /json/state (summarised by bot/orbe_web.py on the Pi) ---------- */
+let liveKey=null;
+function liveShow(d){
+  const ok=!!(d&&d.online);
+  $('offline').hidden=ok; $('liveBadge').className="livebadge "+(ok?"ok":"off");
+  $('liveBadge').textContent=ok?"● EN VIVO · "+d.mode:"● SIN CONEXIÓN";
+  if(!ok){ segs=[]; seq=null; raw.fill(0); liveKey=null; $('nowName').textContent="—"; return; }
+  const sq=d.pl>=0&&PRESETS.find(p=>p.id===d.pl&&p.seq);   // a sequence (Strobo Ola): walk its steps here, polling is too slow
+  const key=sq?"seq"+d.pl:JSON.stringify([d.on,d.bri,d.seg]);
+  if(key!==liveKey){
+    liveKey=key;
+    if(sq) loadPreset(d.pl);
+    else{
+      seq=null; curPreset=-1;
+      edited[-1]={id:-1,n:d.name,bri:d.on?d.bri:0,seg:d.seg.filter(s=>s.stop>s.start&&s.on!==false).map(s=>({id:s.id,start:s.start,stop:s.stop,
+        fx:s.fx,sx:s.sx,ix:s.ix,c1:s.c1,c2:s.c2,c3:s.c3,pal:s.pal,col:s.col.map(c=>c.slice(0,3)),bri:s.bri,rev:!!s.rev,o2:!!s.o2}))};
+      segs=edited[-1].seg.map(makeSeg); GBRI=edited[-1].bri;
+    }
+  }
+  $('nowName').textContent=d.name;
+}
+async function livePoll(){
+  let d=null;
+  try{ const r=await fetch("api/state",{cache:"no-store"}); if(r.ok) d=await r.json(); }catch(e){}
+  liveShow(d); setTimeout(livePoll,2000);
+}
+initUI();
+if(LIVE){
+  document.querySelector('.app').classList.add('live'); $('liveBadge').hidden=false; $('liveCta').hidden=false;
+  document.querySelector('.brand').innerHTML="Sensoria <b>En vivo</b>"; document.title="Sensoria En Vivo";
+  livePoll();
+} else loadPreset(15);
+requestAnimationFrame(frame);
 </script>

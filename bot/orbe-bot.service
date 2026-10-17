@@ -1,0 +1,14 @@
+[Unit]
+Description=ORBE SENSORIAL BOT (Telegram -> WLED SUB ORBE A)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/orbe-bot.env
+ExecStart=/usr/bin/python3 /opt/orbe-bot/orbe_bot.py
+Restart=always
+RestartSec=10
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target
