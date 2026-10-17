@@ -6,6 +6,8 @@
   sensoria.py push [dev ...]        # show what would be sent (dry run)
   sensoria.py push --apply [dev ...]
   sensoria.py status                # who answers, uptime, current preset
+  sensoria.py ota [dev] [--apply]   # flash firmware/dist/*.bin over the air (default: sub-orbe-b, to test it first)
+  sensoria.py wifi [--apply]        # rename the wifi networks (red.ap → red.ap_propuesto) in a safe order
 
 dev = sub-orbe-a | sub-orbe-b | diana (default: all). B and DIANA live only on SUB ORBE A's AP, so reaching them
 means hopping the laptop's wifi to that AP and back; every hop restores the home network on exit.
@@ -15,15 +17,24 @@ import argparse, contextlib, copy, datetime, json, math, pathlib, subprocess, sy
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 WLED_FX = json.loads((ROOT / "data/wled-0.15-effects.json").read_text())
+CUSTOM_FX = json.loads((ROOT / "data/sensoria-effects.json").read_text())   # effects of our own firmware
 WLED_PAL = json.loads((ROOT / "data/wled-0.15-palettes.json").read_text())
 PAL_ALIAS = {"default": 0, "color1": 2, "colors12": 3, "gradient": 4, "colors-only": 5}
 GROUPS = ("grandes", "chicos", "diana")
 
 
-def load():
+def load(preview=False):
+    """Looks and sequences for the controllers. Looks that need our firmware are left out (and the sequence they
+    replace is kept) until [firmware] says it is installed; preview=True returns those looks for the simulator."""
     setup = tomllib.loads((ROOT / "setup.toml").read_text())
     data = tomllib.loads((ROOT / "looks" / f"{setup['proyecto']['look_activo']}.toml").read_text())
-    return setup, data["look"], data.get("secuencia", [])
+    fw = {k for k, v in setup.get("firmware", {}).items() if v is True}
+    looks = [lk for lk in data["look"] if lk.get("requiere_firmware", None) in fw | {None}]
+    replaced = {lk["id"] for lk in looks if lk.get("requiere_firmware")}
+    sequences = [sq for sq in data.get("secuencia", []) if sq.get("reemplazo_firmware") not in replaced]
+    if preview:
+        return [lk for lk in data["look"] if lk.get("requiere_firmware") and lk not in looks]
+    return setup, looks, sequences
 
 
 # ------------------------------------------------------------------ compile
@@ -80,6 +91,8 @@ class Compiler:
     def fx(name):
         if isinstance(name, int):
             return name
+        if name in CUSTOM_FX:
+            return CUSTOM_FX[name]
         if name not in WLED_FX:
             sys.exit(f"efecto desconocido: {name}")
         return WLED_FX.index(name)
@@ -138,16 +151,33 @@ class Compiler:
         return presets
 
     def presets(self, looks, sequences=()):
+        """All presets: looks, sequence steps, the main playlist and the boot playlist.
+        A playlist can't contain another playlist, so a sequence joins the main one by chaining: the main playlist
+        runs once and ends on the sequence, which repeats for its duration and ends back on the main playlist."""
         out = {"0": {}}
         for lk in looks:
             out[str(lk["id"])] = self.preset(lk)
-        for sq in sequences:
-            out.update(self.sequence(sq))
         pl = self.s["proyecto"]["playlist"]
-        ids = [lk["id"] for lk in looks if lk.get("playlist", True)]
+        chain = []
+        for sq in sequences:
+            seq = self.sequence(sq)
+            body = seq[str(sq["id"])]["playlist"]
+            if sq.get("duracion_s"):
+                cycle = sum(body["dur"]) / 10
+                body["repeat"] = max(1, round(sq["duracion_s"] / cycle))
+                chain.append(sq["id"])
+            out.update(seq)
+        playable = [lk for lk in looks if lk.get("playlist", True) and lk["id"] != self.s["proyecto"]["arranque"]["test"]]
+        ids = [lk["id"] for lk in playable]
         out[str(pl["id"])] = {"n": pl["nombre"], "on": True, "playlist": {
-            "ps": ids, "dur": [pl["duracion_s"] * 10] * len(ids), "transition": [pl["transicion_s"] * 10] * len(ids),
-            "repeat": 0, "end": 0, "r": False}}
+            "ps": ids, "dur": [lk.get("duracion_s", pl["duracion_s"]) * 10 for lk in playable],
+            "transition": [pl["transicion_s"] * 10] * len(ids), "repeat": 1 if chain else 0,
+            "end": chain[0] if chain else 0, "r": False}}
+        for i, sid in enumerate(chain):
+            out[str(sid)]["playlist"]["end"] = chain[i + 1] if i + 1 < len(chain) else pl["id"]
+        ar = self.s["proyecto"]["arranque"]
+        out[str(ar["id"])] = {"n": "Arranque", "on": True, "playlist": {
+            "ps": [ar["test"]], "dur": [ar["segundos"] * 10], "transition": [0], "repeat": 1, "end": pl["id"], "r": False}}
         return out
 
     def palettes(self):
@@ -162,7 +192,7 @@ class Compiler:
         diana_abl = {str(r["leds"]): r["abl_ma"] for r in self.diana_rings}
         return {
             "sub-orbe-a": {"id": {"name": c["sub-orbe-a"]["nombre"], "mdns": c["sub-orbe-a"]["mdns"]},
-                          "def": {"ps": pr["playlist"]["id"], "on": True, "bri": pr["brillo"]},
+                          "def": {"ps": pr["arranque"]["id"], "on": True, "bri": pr["brillo"]},
                           "um": {"AudioReactive": {"config": {"squelch": au["squelch"], "gain": au["ganancia"], "AGC": au["agc"]}}}},
             "sub-orbe-b": {"id": {"name": c["sub-orbe-b"]["nombre"], "mdns": c["sub-orbe-b"]["mdns"]}},
             "diana": {"id": {"name": c["diana"]["nombre"], "mdns": c["diana"]["mdns"]},
@@ -182,23 +212,28 @@ def cmd_build(_args):
     for dev, patch in comp.cfg_patches().items():
         (BUILD / dev).mkdir(parents=True, exist_ok=True)
         (BUILD / dev / "cfg.patch.json").write_text(json.dumps(patch, indent=1))
-    sim = build_simulator(comp, presets, setup)
+    sim = build_simulator(comp, presets, setup, load(preview=True))
     pl = presets[str(setup["proyecto"]["playlist"]["id"])]["playlist"]["ps"]
     print(f"build/ listo: {len(looks)} looks, {len(sequences)} secuencias, playlist {pl}, {len(comp.palettes())} paletas, {comp.total} LEDs")
     print(f"simulador: {sim}")
 
 
-def build_simulator(comp, presets, setup):
+def build_simulator(comp, presets, setup, preview=()):
     sim = []
-    main_pl = setup["proyecto"]["playlist"]["id"]
-    step_ids = {i for k, p in presets.items() if "playlist" in p and int(k) != main_pl for i in p["playlist"]["ps"]}
+    main_pl, boot = setup["proyecto"]["playlist"]["id"], setup["proyecto"]["arranque"]["id"]
+    presets = dict(presets)
+    for lk in preview:   # firmware-only looks, shown in the simulator before the firmware is installed
+        presets[str(lk["id"])] = comp.preset({**lk, "nombre": lk["nombre"] + " (firmware)"})
+    step_ids = {i for k, p in presets.items() if "playlist" in p and int(k) not in (main_pl, boot) for i in p["playlist"]["ps"]}
     for k, p in presets.items():
+        if int(k) == boot:
+            continue
         if "playlist" in p and int(k) != main_pl:   # a sequence: the simulator walks its steps itself
             sim.append({"id": int(k), "n": p["n"], "seq": p["playlist"]["ps"], "dur": p["playlist"]["dur"][0] * 100})
             continue
         if "seg" not in p:
             continue
-        segs = [{f: s[f] for f in ("id", "start", "stop", "fx", "sx", "ix", "pal", "col", "bri", "rev", "o2")}
+        segs = [{f: s[f] for f in ("id", "start", "stop", "fx", "sx", "ix", "c1", "pal", "col", "bri", "rev", "o2")}
                 for s in p["seg"] if s.get("stop", 0)]
         sim.append({"id": int(k), "n": p["n"], "bri": p["bri"], "seg": segs, **({"hidden": True} if int(k) in step_ids else {})})
     sim.sort(key=lambda x: (x["id"] < 10, x["id"]))
@@ -329,7 +364,7 @@ def cmd_push(args):
         plan += [("sub-orbe-a", "upload", p.name, p.read_bytes()) for p in sorted(a.glob("palette*.json"))]
         plan += [("sub-orbe-a", "upload", "presets.json", (a / "presets.json").read_bytes()),
                  ("sub-orbe-a", "cfg", None, json.loads((BUILD / "sub-orbe-a/cfg.patch.json").read_text())),
-                 ("sub-orbe-a", "start", None, setup["proyecto"]["playlist"]["id"])]
+                 ("sub-orbe-a", "start", None, setup["proyecto"]["arranque"]["id"])]
     if "sub-orbe-b" in args.dev:
         plan.append(("sub-orbe-b", "cfg", None, json.loads((BUILD / "sub-orbe-b/cfg.patch.json").read_text())))
     if "diana" in args.dev:
@@ -379,17 +414,101 @@ def cmd_status(args):
                     print(f"{dev:10} {base:22} sin respuesta ({e})")
 
 
+def wait_up(base, secs=90):
+    t0 = time.time()
+    while time.time() - t0 < secs:
+        if reachable(base):
+            return True
+        time.sleep(3)
+    return False
+
+
+def cmd_ota(args):
+    """Flash our firmware over the air. Try it on sub-orbe-b first: same hardware, and if it fails to boot only a
+    receiver goes dark (recovery is a USB flash of the official 0.15.1 ESP32_Ethernet bin)."""
+    setup = load()[0]
+    binf = ROOT / setup["firmware"]["bin"]
+    if not binf.exists():
+        sys.exit(f"falta {binf}: corré firmware/build.sh")
+    data = binf.read_bytes()
+    print(f"firmware {binf.name} ({len(data)} bytes) → {', '.join(args.dev)}")
+    if not args.apply:
+        print("dry run: agregá --apply para flashear")
+        return
+    for ssid, items in by_route(setup, args.dev).items():
+        with wifi(setup, ssid):
+            for dev, base in items:
+                info = get_json(base, "/json/info")
+                if info.get("release") != "ESP32_Ethernet" or info.get("arch") != "esp32":
+                    print(f"{dev}: release {info.get('release')} / {info.get('arch')}: no coincide, no flasheo")
+                    continue
+                b = uuid.uuid4().hex
+                body = (f"--{b}\r\nContent-Disposition: form-data; name=\"update\"; filename=\"firmware.bin\"\r\n"
+                        f"Content-Type: application/octet-stream\r\n\r\n").encode() + data + f"\r\n--{b}--\r\n".encode()
+                print(f"{dev}: subiendo…")
+                http(base + "/update", body, f"multipart/form-data; boundary={b}", tries=1, timeout=180)
+                time.sleep(10)
+                if not wait_up(base):
+                    print(f"{dev}: NO volvió después de 90 s — revisar (recuperación por USB con el bin oficial)")
+                    continue
+                fx = get_json(base, "/json/effects")
+                ok = len(fx) > 53 and fx[53] == "Strobe Fase"
+                print(f"{dev}: volvió, versión {get_json(base, '/json/info')['ver']}, Strobe Fase {'OK (id 53)' if ok else 'NO ESTÁ'}")
+
+
+def cmd_wifi(args):
+    """Rename the wifi networks to red.ap_propuesto / aps_respaldo_propuestos without stranding anyone:
+    receivers first (they drop off and wait on their fallback AP), then the master's AP, then check."""
+    setup = load()[0]
+    red, ctl = setup["red"], setup["controlador"]
+    old, new, fb = red["ap"], red["ap_propuesto"], red.get("aps_respaldo_propuestos", {})
+    if old == new:
+        sys.exit(f"red.ap ya es {new}")
+    print(f"1. sub-orbe-b y diana: cliente de '{old}' → '{new}', AP de respaldo → {fb}, reinicio")
+    print(f"2. sub-orbe-a: AP '{old}' → '{new}', reinicio")
+    print(f"3. laptop a '{new}', chequear sub-orbe-b y diana, actualizar setup.toml (red.ap)")
+    if not args.apply:
+        print("dry run: agregá --apply (hacelo en la obra, con los tres prendidos)")
+        return
+    with wifi(setup, old):
+        for dev in ("sub-orbe-b", "diana"):
+            base = "http://" + ctl[dev]["ap_ip"]
+            ins = get_json(base, "/json/cfg")["nw"]["ins"][0]
+            patch = {"nw": {"ins": [{"ssid": new, "ip": ins["ip"], "gw": ins["gw"], "sn": ins["sn"]}]}}
+            if dev in fb:
+                patch["ap"] = {"ssid": fb[dev]}
+            post_json(base, "/json/cfg", patch)
+            post_json(base, "/json/state", {"rb": True})
+            print(f"  {dev}: listo, reiniciando")
+    ssid, base = route(setup, "sub-orbe-a")
+    with wifi(setup, ssid):
+        post_json(base, "/json/cfg", {"ap": {"ssid": new}})
+        post_json(base, "/json/state", {"rb": True})
+        print("  sub-orbe-a: AP renombrado, reiniciando")
+    time.sleep(45)
+    setup["red"]["ap"] = new
+    with wifi(setup, new):
+        for dev in ("sub-orbe-a", "sub-orbe-b", "diana"):
+            base = "http://" + ctl[dev]["ap_ip"]
+            print(f"  {dev}: {'OK' if wait_up(base, 60) else 'NO RESPONDE'} en {base}")
+    sh("iwctl", "known-networks", new, "set-property", "AutoConnect", "no")
+    toml = ROOT / "setup.toml"
+    toml.write_text(toml.read_text().replace(f'ap = "{old}"', f'ap = "{new}"', 1))
+    print(f"setup.toml: red.ap = \"{new}\" (commitealo)")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("build")
-    for name in ("backup", "push", "status"):
+    for name in ("backup", "push", "status", "ota", "wifi"):
         p = sub.add_parser(name)
-        p.add_argument("dev", nargs="*", default=["sub-orbe-a", "sub-orbe-b", "diana"])
-        if name == "push":
+        p.add_argument("dev", nargs="*", default=["sub-orbe-b"] if name == "ota" else ["sub-orbe-a", "sub-orbe-b", "diana"])
+        if name in ("push", "ota", "wifi"):
             p.add_argument("--apply", action="store_true")
     args = ap.parse_args()
-    {"build": cmd_build, "backup": cmd_backup, "push": cmd_push, "status": cmd_status}[args.cmd](args)
+    {"build": cmd_build, "backup": cmd_backup, "push": cmd_push, "status": cmd_status, "ota": cmd_ota,
+     "wifi": cmd_wifi}[args.cmd](args)
 
 
 if __name__ == "__main__":

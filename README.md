@@ -38,6 +38,8 @@ python3 tools/sensoria.py status           # quién responde, uptime, preset act
 python3 tools/sensoria.py backup           # baja cfg/presets/paletas de los 3 → backups/<fecha>/
 python3 tools/sensoria.py push             # muestra qué mandaría (dry run)
 python3 tools/sensoria.py push --apply     # lo manda (hacé backup antes)
+python3 tools/sensoria.py ota [dev] --apply   # firmware propio por OTA (firmware/, efecto Strobe Fase)
+python3 tools/sensoria.py wifi --apply     # renombra los wifi en orden seguro
 tools/simulador.sh                         # abre el simulador local (con micrófono / audio de la PC)
 ```
 
@@ -56,7 +58,8 @@ tools/simulador.sh                         # abre el simulador local (con micró
 
 - `setup.toml`: hardware, red, anillos, audio, colores y paletas.
 - `looks/`: un archivo de looks por set. `agnosticos.toml` es la propuesta actual.
-- `tools/sensoria.py`: compilar, backup, push y status.
+- `tools/sensoria.py`: compilar, backup, push, status, OTA y renombre de wifi.
+- `firmware/`: WLED 0.15.1 + efecto "Strobe Fase" (strobo con fase por segmento); `build.sh` compila y `dist/` tiene el binario.
 - `simulator/template.html`: fuente del simulador; `build` le inyecta los presets.
 - `backups/`: snapshots de los tres controladores.
 - `docs/`: nombres, notas técnicas de WLED, historial y plan de deploy.

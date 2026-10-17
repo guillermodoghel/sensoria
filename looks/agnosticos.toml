@@ -108,12 +108,11 @@ diana = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
 puntitos = { fx = "Two Dots", color = "celeste", sx = [70, 110, 90, 130, 60, 100], ix = 12, rev = [false, true, false, true, false, true] }
 puntitos_diana = { fx = "Two Dots", color = "celeste", sx = [130, 100, 80, 60], ix = 12, rev = [false, true, false, true] }
 
-# ---- fuera de la playlist
+# ---- también en la playlist (los estrobos duran 30 s)
 
 [[look]]
 id = 22
 nombre = "Celeste"
-playlist = false
 paleta = "azul-celeste"
 color = "azul"          # fondo negro: con celeste de fondo los anillos quedaban llenos aunque no sonara nada
 grandes = { fx = "Gravcenter", sx = 160, ix = 150 }
@@ -123,7 +122,7 @@ diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80], paleta = "color1"
 [[look]]
 id = 23
 nombre = "Strobo"
-playlist = false
+duracion_s = 30
 paleta = "color1"
 color = "blanco"
 # Cada anillo es un strobo con su propio período ((255 - sx) * 20 ms: 1.3 s … 4.7 s, todos distintos), así los destellos
@@ -134,6 +133,21 @@ diana = { fx = "Strobe", sx = [160, 100, 50, 20] }
 # Fondo audio-rítmico en los segmentos de overlay (10-19), que se dibujan DESPUÉS del strobo: Plasmoid oscurece apenas
 # lo que ya hay (fadeToBlackBy 32) y suma el plasma, así el destello blanco se sigue viendo y entre destellos late el plasma.
 # Al revés no anda: el strobo, cuando está apagado, pinta su anillo de negro y taparía el fondo.
+puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
+puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
+id = 24
+nombre = "Strobo Ola"
+requiere_firmware = "strobe_fase"   # solo se compila con [firmware] strobe_fase = true; si no, va la [[secuencia]] 31
+duracion_s = 30
+paleta = "color1"
+color = "blanco"
+# Strobe Fase: mismo período para todo el ORBE (1.2 s) y para toda la DIANA (0.8 s); cada anillo destella en su fase
+# (c1 = momento del ciclo, 0-255), de adentro hacia afuera y de a uno. ix = duración del destello (~150 ms).
+grandes = { fx = "Strobe Fase", sx = 197, ix = 27, c1 = [171, 213, 128] }   # A-XL, B-XL, B-L
+chicos = { fx = "Strobe Fase", sx = 197, ix = 27, c1 = [85, 0, 43] }        # A-M, A-XS, B-S → A-XS, B-S, A-M, B-L, A-XL, B-XL
+diana = { fx = "Strobe Fase", sx = 217, ix = 40, c1 = [0, 64, 128, 192] }   # D1 → D4
 puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
 puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
 
@@ -152,7 +166,9 @@ diana = { fx = "Solid", colores = ["rojo", "verde", "azul", "magenta"] }
 # un efecto que dependa del reloj (Noisemove) y no de su estado, porque cada paso reinicia los efectos.
 
 [[secuencia]]
-id = 31                       # la playlist que se elige a mano
+id = 31                       # sub-playlist encadenada desde la playlist principal (end) y de vuelta
+reemplazo_firmware = 24       # con el firmware Strobe Fase se usa el look 24 en lugar de esta secuencia
+duracion_s = 30
 nombre = "Strobo Ola"
 preset_base = 40              # los pasos ocupan 40, 41, ...
 paso_s = 0.2

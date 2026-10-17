@@ -4,8 +4,16 @@
 [proyecto]
 nombre = "SENSORIA"
 look_activo = "agnosticos"      # archivo en looks/ que se sube a SUB ORBE A
-playlist = { id = 30, nombre = "Techno Oscuro", duracion_s = 600, transicion_s = 3 }
+playlist = { id = 30, nombre = "Techno Oscuro", duracion_s = 600, transicion_s = 3 }   # duración por defecto de cada look
+arranque = { id = 32, test = 1, segundos = 5 }    # al prender: preset "Test anillos" 5 s y después la playlist
 brillo = 64                     # brillo general de todos los looks y al arrancar: 25% (0-255)
+
+# ---------------------------------------------------------------- firmware
+# strobe_fase = true cuando SUB ORBE A tenga el firmware propio (firmware/, efecto "Strobe Fase"): Strobo Ola pasa a ser
+# un solo preset con un destello por anillo. Con false se usa la versión de mini-playlist (secuencia de presets).
+[firmware]
+strobe_fase = false
+bin = "firmware/dist/sensoria-wled-0.15.1-ESP32_Ethernet.bin"
 
 # ---------------------------------------------------------------- red
 [red]

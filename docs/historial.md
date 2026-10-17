@@ -21,4 +21,10 @@
   - **DIANA:** 4 segmentos, uno por anillo, con efectos que resaltan los círculos y no dependen de dónde arranca cada tira (sin Gravcenter ni Noisemeter).
   - **Estado:** todavía no subida.
 
+- **ORBE y SUB ORBE:** los 6 anillos son el ORBE, conformado por SUB ORBE A y SUB ORBE B. Wifi nuevos decididos: SUB ORBE A, SUB ORBE B y DIANA.
+- **Brillo general al 25%.** Arranque: Test anillos 5 s, después la playlist. Playlist con todos los looks, 10 min cada uno, y los estrobos de 30 s.
+- **Strobo y Strobo Ola** con fondo audio-rítmico. Strobo Ola funciona como secuencia de presets, y con el firmware propio pasa a ser un solo preset.
+- **Firmware propio:** WLED 0.15.1 más el efecto "Strobe Fase", compilado y listo para OTA.
+- **Repo público:** https://github.com/guillermodoghel/sensoria
+
 **Lo que está cargado en los controladores hoy** es el set de presets del 2026-10-17 (ver `backups/2026-10-17/sub-orbe-a/presets.json`): DIANA como un solo segmento (6) con Noisemeter invertido, y los puntitos en los segmentos 7–12.
