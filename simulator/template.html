@@ -463,12 +463,17 @@ const FX_ORDER=[156,157,158,132,155,141,135,136,145,133,130,129,131,140,163,134,
 let curPreset=null, edited={}, groupSel="outer";
 const GROUPS={outer:{n:"ORBE grandes",ids:[0,4,5]},inner:{n:"ORBE chicos",ids:[1,2,3]},bull:{n:"DIANA",ids:[6,7,8,9]},dots:{n:"Puntitos ORBE",ids:[10,11,12,13,14,15]},ddots:{n:"Puntitos DIANA",ids:[16,17,18,19]}};
 function presetData(id){return edited[id]||JSON.parse(JSON.stringify(PRESETS.find(p=>p.id===id)));}
-function loadPreset(id,keepPlaylist){
+let seq=null; // running sequence playlist: {id, steps, dur, i, t}
+function loadPreset(id,keepPlaylist,step){
+  const base=PRESETS.find(p=>p.id===id);
+  if(base&&base.seq){ seq={id,n:base.n,steps:base.seq,dur:base.dur,i:0,t:0}; return loadPreset(base.seq[0],keepPlaylist,true); }
+  if(!step) seq=null;
   const p=presetData(id); edited[id]=p; curPreset=id;
   segs=p.seg.map(makeSeg); GBRI=p.bri||140;
-  raw.fill(0);
+  if(!step) raw.fill(0); // WLED doesn't clear the LEDs when a preset changes; only a fresh pick starts dark here
   document.getElementById('gbri').value=GBRI;document.getElementById('gbriO').textContent=GBRI;
-  document.getElementById('nowName').textContent=p.id+" · "+p.n;
+  document.getElementById('nowName').textContent=seq?(seq.id+" · "+seq.n+" (paso "+(seq.i+1)+"/"+seq.steps.length+")"):(p.id+" · "+p.n);
+  if(step){ if(seq.i===0) renderPresetList(); return; }
   if(!segs.some(s=>GROUPS[groupSel].ids.includes(s.id)))groupSel="outer";
   renderPresetList();renderTabs();bindEditor();updateJSON();
   if(!keepPlaylist) plT=0;
@@ -485,13 +490,13 @@ function updateJSON(){
   const used=new Set(st.seg.map(s=>s.id)); for(let i=0;i<=19;i++) if(!used.has(i)) st.seg.push({id:i,stop:0});
   document.getElementById('jsonOut').value=JSON.stringify({n:p.n+(isEdited(p.id)?" (editado)":""),...st});
 }
-function isEdited(id){const o=PRESETS.find(p=>p.id===id);return JSON.stringify(o.seg)!==JSON.stringify(edited[id]?.seg)||o.bri!==edited[id]?.bri;}
+function isEdited(id){const o=PRESETS.find(p=>p.id===id);if(!o||!o.seg)return false;return JSON.stringify(o.seg)!==JSON.stringify(edited[id]?.seg)||o.bri!==edited[id]?.bri;}
 
 /* ---------- UI ---------- */
 const $=id=>document.getElementById(id);
 function renderPresetList(){
   const el=$('presetList'); el.innerHTML="";
-  PRESETS.forEach(p=>{const b=document.createElement('button');b.className=p.id===curPreset?"cur":"";
+  PRESETS.forEach(p=>{if(p.hidden)return;const b=document.createElement('button');b.className=(p.id===curPreset||(seq&&seq.id===p.id))?"cur":"";
     b.innerHTML=`<span class="id">${p.id}</span><span class="nm"></span>`;b.querySelector('.nm').textContent=p.n+(edited[p.id]&&isEdited(p.id)?" •":"");
     b.onclick=()=>loadPreset(p.id);el.appendChild(b);});
 }
@@ -621,6 +626,7 @@ function frame(t){
   const dt=Math.min(100,t-last); last=t; acc+=dt;
   let ticked=false;
   while(acc>=FRAMETIME){acc-=FRAMETIME;analyse(FRAMETIME);tick();ticked=true;}
+  if(seq){seq.t+=dt;if(seq.t>=seq.dur){seq.t-=seq.dur;seq.i=(seq.i+1)%seq.steps.length;loadPreset(seq.steps[seq.i],true,true);}}
   if($('plOn').checked){plT+=dt/1000;if(plT>=+$('plDur').value){plT=0;const i=PLAYLIST.indexOf(curPreset);loadPreset(PLAYLIST[(i+1)%PLAYLIST.length],true);}}
   if(ticked){meterT+=dt;const bars=$('geq').children;for(let i=0;i<16;i++)bars[i].style.height=(2+S.fft[i]/255*44)+"px";$('volBar').style.height=(S.vol/255*100)+"%";$('peakDot').classList.toggle('on',S.peak||NOW-lastPeak<90);}
   controls.update(); renderer.render(scene,camera); requestAnimationFrame(frame);

@@ -50,8 +50,9 @@ Los presets que no usan puntitos llevan `{"id":10..19,"stop":0}`, así al cambia
 | rango | uso |
 |---|---|
 | 1–9 | utilidades (1 = Test anillos: cada anillo de un color para identificar el cableado) |
-| 10–29 | looks (10–19 en la playlist; fuera de la playlist: 22 Celeste, 23 Strobo, 24 Strobo Ola) |
-| 30–39 | playlists (30 = Techno Oscuro, 10 min por look, arranca al prender) |
+| 10–29 | looks (10–19 en la playlist; fuera de la playlist: 22 Celeste, 23 Strobo) |
+| 30–39 | playlists (30 = Techno Oscuro, 10 min por look, arranca al prender · 31 = Strobo Ola) |
+| 40–59 | pasos de secuencias (40–51 = los 12 pasos de Strobo Ola) |
 
 **Colores del preset 1 (Test anillos):**
 - **ORBE:** A-XL rojo, B-XL magenta, B-L amarillo, A-M verde, A-XS azul, B-S celeste.

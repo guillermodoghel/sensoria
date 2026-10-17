@@ -138,24 +138,6 @@ puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color =
 puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
 
 [[look]]
-id = 24
-nombre = "Strobo Ola"
-playlist = false
-paleta = "color1"
-color = ["negro", "blanco", "negro"]
-# Blink con colores invertidos: cada ciclo arranca en negro (color 1) y cada anillo pasa a blanco (color 2) a su turno
-# (ix = parte del ciclo que espera en negro), de adentro hacia afuera; al final del ciclo se apaga todo junto.
-# WLED no deja desfasar strobos en el tiempo, por eso es una ola que se acumula y no un destello de a uno.
-# ORBE (ciclo 1.8 s): A-XS → B-S → A-M → B-L → A-XL + B-XL (los dos más grandes, cruzados, juntos)
-grandes = { fx = "Blink", sx = 165, ix = [213, 213, 171] }     # A-XL, B-XL, B-L
-chicos = { fx = "Blink", sx = 165, ix = [128, 43, 85] }        # A-M, A-XS, B-S
-# DIANA (ciclo 1.2 s, por su cuenta): D1 → D2 → D3 → D4
-diana = { fx = "Blink", sx = 195, ix = [51, 102, 154, 205] }
-# mismo fondo audio-rítmico que el Strobo, dibujado arriba
-puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
-puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
-
-[[look]]
 id = 1
 nombre = "Test anillos"
 playlist = false
@@ -163,3 +145,19 @@ paleta = "color1"
 grandes = { fx = "Solid", colores = ["rojo", "magenta", "amarillo"] }
 chicos = { fx = "Solid", colores = ["verde", "azul", "celeste"] }
 diana = { fx = "Solid", colores = ["rojo", "verde", "azul", "magenta"] }
+
+# ---- secuencias: una mini-playlist de presets "paso", porque WLED no deja desfasar efectos en el tiempo.
+# Cada paso deja UN anillo del ORBE y UN anillo de la DIANA en blanco (cada uno con su propio orden); son
+# mcm(len(orbe), len(diana)) pasos. El fondo va en los segmentos de overlay, dibujado arriba del blanco; tiene que ser
+# un efecto que dependa del reloj (Noisemove) y no de su estado, porque cada paso reinicia los efectos.
+
+[[secuencia]]
+id = 31                       # la playlist que se elige a mano
+nombre = "Strobo Ola"
+preset_base = 40              # los pasos ocupan 40, 41, ...
+paso_s = 0.2
+blanco = "blanco"
+orbe = ["A-XS", "B-S", "A-M", "B-L", "A-XL", "B-XL"]      # de adentro hacia afuera, de a uno
+diana = ["D1", "D2", "D3", "D4"]
+fondo = { fx = "Noisemove", sx = 140, ix = 160, paleta = "rojo-magenta", color = "rojo" }
+fondo_diana = { fx = "Noisemove", sx = [200, 170, 140, 110], ix = 255, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }

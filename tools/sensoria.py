@@ -10,7 +10,7 @@
 dev = sub-orbe-a | sub-orbe-b | diana (default: all). B and DIANA live only on SUB ORBE A's AP, so reaching them
 means hopping the laptop's wifi to that AP and back; every hop restores the home network on exit.
 """
-import argparse, contextlib, copy, datetime, json, pathlib, subprocess, sys, time, tomllib, urllib.request, uuid
+import argparse, contextlib, copy, datetime, json, math, pathlib, subprocess, sys, time, tomllib, urllib.request, uuid
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
@@ -22,8 +22,8 @@ GROUPS = ("grandes", "chicos", "diana")
 
 def load():
     setup = tomllib.loads((ROOT / "setup.toml").read_text())
-    looks = tomllib.loads((ROOT / "looks" / f"{setup['proyecto']['look_activo']}.toml").read_text())["look"]
-    return setup, looks
+    data = tomllib.loads((ROOT / "looks" / f"{setup['proyecto']['look_activo']}.toml").read_text())
+    return setup, data["look"], data.get("secuencia", [])
 
 
 # ------------------------------------------------------------------ compile
@@ -120,10 +120,29 @@ class Compiler:
         return {"n": look["nombre"], "on": True, "bri": look.get("brillo", self.s["proyecto"]["brillo"]),
                 "transition": 7, "mainseg": 0, "seg": seg_list}
 
-    def presets(self, looks):
+    def sequence(self, sq):
+        """Expand a [[secuencia]] into step presets + a playlist that walks them."""
+        n = math.lcm(len(sq["orbe"]), len(sq["diana"]))
+        steps, presets = [], {}
+        for k in range(n):
+            white = {sq["orbe"][k % len(sq["orbe"])], sq["diana"][k % len(sq["diana"])]}
+            look = {"id": sq["preset_base"] + k, "nombre": f"{sq['nombre']} {k + 1}", "paleta": "color1",
+                    "puntitos": sq["fondo"], "puntitos_diana": sq["fondo_diana"]}
+            for g in GROUPS:
+                rings, _ = self.group(g)
+                look[g] = {"fx": "Solid", "colores": [sq["blanco"] if r["nombre"] in white else "negro" for r in rings]}
+            presets[str(look["id"])] = self.preset(look)
+            steps.append(look["id"])
+        presets[str(sq["id"])] = {"n": sq["nombre"], "on": True, "playlist": {
+            "ps": steps, "dur": [round(sq["paso_s"] * 10)] * n, "transition": [0] * n, "repeat": 0, "end": 0, "r": False}}
+        return presets
+
+    def presets(self, looks, sequences=()):
         out = {"0": {}}
         for lk in looks:
             out[str(lk["id"])] = self.preset(lk)
+        for sq in sequences:
+            out.update(self.sequence(sq))
         pl = self.s["proyecto"]["playlist"]
         ids = [lk["id"] for lk in looks if lk.get("playlist", True)]
         out[str(pl["id"])] = {"n": pl["nombre"], "on": True, "playlist": {
@@ -152,9 +171,9 @@ class Compiler:
 
 
 def cmd_build(_args):
-    setup, looks = load()
+    setup, looks, sequences = load()
     comp = Compiler(setup)
-    presets = comp.presets(looks)
+    presets = comp.presets(looks, sequences)
     a = BUILD / "sub-orbe-a"
     a.mkdir(parents=True, exist_ok=True)
     (a / "presets.json").write_text(json.dumps(presets, separators=(",", ":")))
@@ -163,22 +182,27 @@ def cmd_build(_args):
     for dev, patch in comp.cfg_patches().items():
         (BUILD / dev).mkdir(parents=True, exist_ok=True)
         (BUILD / dev / "cfg.patch.json").write_text(json.dumps(patch, indent=1))
-    sim = build_simulator(comp, presets)
+    sim = build_simulator(comp, presets, setup)
     pl = presets[str(setup["proyecto"]["playlist"]["id"])]["playlist"]["ps"]
-    print(f"build/ listo: {len(looks)} looks, playlist {pl}, {len(comp.palettes())} paletas, {comp.total} LEDs")
+    print(f"build/ listo: {len(looks)} looks, {len(sequences)} secuencias, playlist {pl}, {len(comp.palettes())} paletas, {comp.total} LEDs")
     print(f"simulador: {sim}")
 
 
-def build_simulator(comp, presets):
+def build_simulator(comp, presets, setup):
     sim = []
+    main_pl = setup["proyecto"]["playlist"]["id"]
+    step_ids = {i for k, p in presets.items() if "playlist" in p and int(k) != main_pl for i in p["playlist"]["ps"]}
     for k, p in presets.items():
+        if "playlist" in p and int(k) != main_pl:   # a sequence: the simulator walks its steps itself
+            sim.append({"id": int(k), "n": p["n"], "seq": p["playlist"]["ps"], "dur": p["playlist"]["dur"][0] * 100})
+            continue
         if "seg" not in p:
             continue
         segs = [{f: s[f] for f in ("id", "start", "stop", "fx", "sx", "ix", "pal", "col", "bri", "rev", "o2")}
                 for s in p["seg"] if s.get("stop", 0)]
-        sim.append({"id": int(k), "n": p["n"], "bri": p["bri"], "seg": segs})
+        sim.append({"id": int(k), "n": p["n"], "bri": p["bri"], "seg": segs, **({"hidden": True} if int(k) in step_ids else {})})
     sim.sort(key=lambda x: (x["id"] < 10, x["id"]))
-    pl = next(p for p in presets.values() if "playlist" in p)["playlist"]["ps"]
+    pl = presets[str(main_pl)]["playlist"]["ps"]
     html = (ROOT / "simulator/template.html").read_text()
     html = html.replace("__PRESETS__", json.dumps(sim, separators=(",", ":"))).replace("__PLAYLIST__", json.dumps(pl))
     out = BUILD / "simulador.html"
@@ -278,7 +302,7 @@ def by_route(setup, devs):
 # ------------------------------------------------------------------ commands
 
 def cmd_backup(args):
-    setup, _ = load()
+    setup = load()[0]
     out = ROOT / "backups" / datetime.date.today().isoformat()
     for ssid, items in by_route(setup, args.dev).items():
         with wifi(setup, ssid):
@@ -297,7 +321,7 @@ def cmd_backup(args):
 
 
 def cmd_push(args):
-    setup, _ = load()
+    setup = load()[0]
     cmd_build(args)
     plan = []
     if "sub-orbe-a" in args.dev:
@@ -343,7 +367,7 @@ def cmd_push(args):
 
 
 def cmd_status(args):
-    setup, _ = load()
+    setup = load()[0]
     for ssid, items in by_route(setup, args.dev).items():
         with wifi(setup, ssid):
             for dev, base in items:
