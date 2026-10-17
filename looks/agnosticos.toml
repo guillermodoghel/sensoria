@@ -1,0 +1,130 @@
+# Looks "agnósticos" (propuesta 2026-10-17).
+# ORBITAS: nada depende de la orientación de los anillos ni de dónde arranca cada tira
+#   (texturas, puntos que recorren el anillo, puntitos orbitando). Sin Gravcentric (punta gris) ni Waterfall (verde pálido).
+# DIANA: efectos que resaltan los 4 círculos concéntricos, un segmento por anillo (D1 centro .. D4 afuera).
+#   cierre   = Gravcenter por anillo: cada círculo se cierra con el volumen, el centro es el más sensible
+#   textura  = Plasmoid por anillo con colores alternados: siempre se leen los 4 círculos
+#   puntitos = fondo suave + dos puntitos girando en cada anillo, como en las órbitas
+#
+# Valores: un escalar vale para todo el grupo; una lista da un valor por anillo en orden
+#   grandes = A-XL, B-XL, B-L · chicos = A-M, A-XS, B-S · diana = D1..D4 · puntitos = A-XL, A-M, A-XS, B-S, B-XL, B-L
+# Campos de cada grupo: fx, sx (velocidad), ix (intensidad), paleta, opacidad, rev, c1,
+#   color (uno, o el trío [c1, c2, c3] de WLED, para todo el grupo) o colores (lista: uno por anillo).
+# Paletas: las de setup.toml por nombre, o las de WLED ("color1" = solo el color 1, "colors-only", "gradient").
+
+[[look]]
+id = 10
+nombre = "Plasma Rojo"
+paleta = "rojo-magenta"
+color = "rojo"
+grandes = { fx = "Plasmoid", sx = 90, ix = 90 }
+chicos = { fx = "Plasmoid", sx = 150, ix = 90 }
+diana = { fx = "Plasmoid", sx = 40, ix = 110, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
+id = 11
+nombre = "Chispas"
+paleta = "rojo-magenta"
+color = "rojo"
+grandes = { fx = "Freqpixels", sx = 120, ix = 40 }
+chicos = { fx = "Freqpixels", sx = 120, ix = 40 }
+diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
+id = 12
+nombre = "Enjambre"
+paleta = "magenta-azul"
+color = "magenta"
+grandes = { fx = "Juggles", sx = 140, ix = 200 }
+chicos = { fx = "Juggles", sx = 170, ix = 200 }
+diana = { fx = "Juggles", sx = [200, 170, 140, 110], ix = 100, paleta = "color1", colores = ["magenta", "azul", "magenta", "azul"] }
+
+[[look]]
+id = 13
+nombre = "Plasma Violeta"
+paleta = "magenta-azul"
+color = "magenta"
+grandes = { fx = "Plasmoid", sx = 90, ix = 90 }
+chicos = { fx = "Juggles", sx = 140, ix = 110 }
+diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "magenta", "azul", "magenta"] }
+
+[[look]]
+id = 14
+nombre = "Ondas"
+paleta = "rojo-azul"
+color = "rojo"
+grandes = { fx = "Ripple Peak", sx = 128, ix = 64 }
+chicos = { fx = "Ripple Peak", sx = 128, ix = 64 }
+diana = { fx = "Plasmoid", sx = 40, ix = 110, paleta = "color1", colores = ["rojo", "azul", "rojo", "azul"] }
+
+[[look]]
+id = 15
+nombre = "Orbitas"
+paleta = "color1"
+color = "rojo"
+grandes = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+chicos = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+diana = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+puntitos = { fx = "Two Dots", color = "celeste", sx = [70, 110, 90, 130, 60, 100], ix = 12, rev = [false, true, false, true, false, true] }
+puntitos_diana = { fx = "Two Dots", color = "celeste", sx = [130, 100, 80, 60], ix = 12, rev = [false, true, false, true] }
+
+[[look]]
+id = 16
+nombre = "Ruido"
+paleta = "rojo-magenta"
+color = "rojo"
+grandes = { fx = "Noisemove", sx = 140, ix = 255 }
+chicos = { fx = "Noisemove", sx = 170, ix = 255 }
+diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
+id = 17
+nombre = "Movimiento"
+paleta = "rojo-azul"
+color = "rojo"
+grandes = { fx = "Noisemove", sx = 140, ix = 160 }
+chicos = { fx = "Juggles", sx = 180, ix = 90 }
+diana = { fx = "Juggles", sx = [200, 170, 140, 110], ix = 100, paleta = "color1", colores = ["rojo", "azul", "rojo", "azul"] }
+
+[[look]]
+id = 18
+nombre = "Blur"
+paleta = "rojo-azul"
+color = "rojo"
+grandes = { fx = "Blurz", sx = 120, ix = 120 }
+chicos = { fx = "Blurz", sx = 120, ix = 120 }
+diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "rojo", "azul", "rojo"] }
+
+[[look]]
+id = 19
+nombre = "Orbitas Azul"
+paleta = "color1"
+color = "azul"
+grandes = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+chicos = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+diana = { fx = "Plasmoid", sx = 90, ix = 70, opacidad = 100 }
+puntitos = { fx = "Two Dots", color = "celeste", sx = [70, 110, 90, 130, 60, 100], ix = 12, rev = [false, true, false, true, false, true] }
+puntitos_diana = { fx = "Two Dots", color = "celeste", sx = [130, 100, 80, 60], ix = 12, rev = [false, true, false, true] }
+
+# ---- fuera de la playlist
+
+[[look]]
+id = 22
+nombre = "Celeste"
+playlist = false
+brillo = 220
+paleta = "colors-only"
+color = ["azul", "celeste", "azul"]
+grandes = { fx = "Gravcenter", sx = 160, ix = 150 }
+chicos = { fx = ["Puddlepeak", "Ripple Peak", "Puddlepeak"], sx = 160, ix = 150, c1 = 8 }
+diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "celeste", "azul", "celeste"] }
+
+[[look]]
+id = 1
+nombre = "Test anillos"
+playlist = false
+brillo = 80
+paleta = "color1"
+grandes = { fx = "Solid", colores = ["rojo", "magenta", "amarillo"] }
+chicos = { fx = "Solid", colores = ["verde", "azul", "celeste"] }
+diana = { fx = "Solid", colores = ["rojo", "verde", "azul", "magenta"] }

@@ -1,0 +1,179 @@
+# SENSORIA — descripción completa del setup físico y de red.
+# Fuente de verdad: tools/sensoria.py compila esto + looks/*.toml a la config de cada WLED.
+
+[proyecto]
+nombre = "SENSORIA"
+look_activo = "agnosticos"      # archivo en looks/ que se sube a ORBITAS A
+playlist = { id = 30, nombre = "Techno Oscuro", duracion_s = 600, transicion_s = 3 }
+brillo = 140                    # brillo general por defecto (0-255)
+
+# ---------------------------------------------------------------- red
+[red]
+casa = "LaSedeFA"               # wifi del lugar (ORBITAS A también se conecta acá)
+ap = "ORBITAS A"                # AP que levanta ORBITAS A; B y DIANA se conectan a este
+ap_propuesto = "SENSORIA"       # renombre pendiente (ver docs/naming.md); no se aplica solo
+interfaz = "wlan0"              # wifi de la laptop, para saltar al AP
+
+# ---------------------------------------------------------------- controladores
+# Los tres son Gledopto ESP32 (WLED 0.15.1 "ESP32_Ethernet"). A es el maestro: corre los efectos de los
+# 1104 LEDs y manda por DDP la parte de B y de DIANA. B y DIANA son receptores puros (sin presets).
+
+[controlador.orbitas-a]
+nombre = "ORBITAS A"
+mdns = "orbitas-a"
+rol = "maestro"
+lan = "192.168.68.50"           # IP fija en LaSedeFA
+ap_ip = "4.3.2.1"
+mic = "PDM (AudioReactive)"
+abl_ma = 15000
+
+[controlador.orbitas-b]
+nombre = "ORBITAS B"
+mdns = "orbitas-b"
+rol = "receptor DDP"
+ap_ip = "4.3.2.200"             # IP fija dentro del AP de ORBITAS A
+ap_respaldo = "ORBITAS B"
+abl_ma = 15000
+
+[controlador.diana]
+nombre = "DIANA"                # ex BULLSEYE
+mdns = "diana"
+rol = "receptor DDP"
+ap_ip = "4.3.2.201"
+ap_respaldo = "BULLSEYE"        # pendiente renombrar a "DIANA"
+fuente = "12V 3A + step-down a 5V (~6 A máx)"
+abl_ma = 5000                   # repartido por anillo, ver [[anillo]] abl_ma
+
+# ---------------------------------------------------------------- anillos
+# Orden = orden de los LEDs en la tira virtual de ORBITAS A (1104 LEDs).
+# ORBITAS: 6 anillos colgados como un giroscopio desprolijo (los dos XL cruzados; el resto en cualquier ángulo),
+# por eso los looks no deben depender de la orientación ni de dónde arranca cada tira.
+# Grupos: GRANDES = A-XL, B-XL, B-L · CHICOS = A-M, A-XS, B-S · DIANA = D1 (centro) .. D4 (afuera).
+
+[[anillo]]
+seg = 0
+nombre = "A-XL"
+leds = 186
+controlador = "orbitas-a"
+pin = 16
+grupo = "grandes"
+
+[[anillo]]
+seg = 1
+nombre = "A-M"
+leds = 110
+controlador = "orbitas-a"
+pin = 12
+grupo = "chicos"
+
+[[anillo]]
+seg = 2
+nombre = "A-XS"
+leds = 37
+controlador = "orbitas-a"
+pin = 4
+grupo = "chicos"
+
+[[anillo]]
+seg = 3
+nombre = "B-S"
+leds = 73
+controlador = "orbitas-b"
+pin = 12
+grupo = "chicos"
+
+[[anillo]]
+seg = 4
+nombre = "B-XL"
+leds = 186
+controlador = "orbitas-b"
+pin = 4
+grupo = "grandes"
+
+[[anillo]]
+seg = 5
+nombre = "B-L"
+leds = 146
+controlador = "orbitas-b"
+pin = 2
+grupo = "grandes"
+
+[[anillo]]
+seg = 6
+nombre = "D1"
+leds = 37
+controlador = "diana"
+pin = 2
+grupo = "diana"
+abl_ma = 500
+
+[[anillo]]
+seg = 7
+nombre = "D2"
+leds = 73
+controlador = "diana"
+pin = 4
+grupo = "diana"
+abl_ma = 1000
+
+[[anillo]]
+seg = 8
+nombre = "D3"
+leds = 110
+controlador = "diana"
+pin = 16
+grupo = "diana"
+abl_ma = 1500
+
+[[anillo]]
+seg = 9
+nombre = "D4"
+leds = 146
+controlador = "diana"
+pin = 12
+grupo = "diana"
+abl_ma = 2000
+
+# Segmentos de "puntitos" (overlay sobre cada anillo): ORBITAS = 10..15, DIANA = 16..19.
+[segmentos]
+puntitos_orbitas = 10
+puntitos_diana = 16
+max = 19
+
+# ---------------------------------------------------------------- audio (AudioReactive en ORBITAS A)
+[audio]
+squelch = 10
+ganancia = 60
+agc = 1               # 0 off · 1 normal · 2 vivid · 3 lazy (defaults de WLED)
+
+# ---------------------------------------------------------------- colores
+# Regla: solo colores puros de canal (0 o 255). Las mezclas se ven lavadas/blancas en estas tiras.
+[colores]
+rojo = [255, 0, 0]
+verde = [0, 255, 0]
+azul = [0, 0, 255]
+celeste = [0, 255, 255]
+magenta = [255, 0, 255]
+amarillo = [255, 255, 0]
+negro = [0, 0, 0]
+
+# Paletas custom (se suben como palette0.json, palette1.json, … → ids 255, 254, …). Cortes duros, sin degradé.
+[[paleta]]
+nombre = "rojo-magenta"
+colores = ["rojo", "magenta"]
+
+[[paleta]]
+nombre = "rojo-azul"
+colores = ["rojo", "azul"]
+
+[[paleta]]
+nombre = "magenta-azul"
+colores = ["magenta", "azul"]
+
+[[paleta]]
+nombre = "azul-celeste"
+colores = ["azul", "celeste"]
+
+[[paleta]]
+nombre = "rojo-celeste"
+colores = ["rojo", "celeste"]
