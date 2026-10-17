@@ -138,6 +138,24 @@ puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color =
 puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
 
 [[look]]
+id = 24
+nombre = "Strobo Ola"
+playlist = false
+paleta = "color1"
+color = ["negro", "blanco", "negro"]
+# Blink con colores invertidos: cada ciclo arranca en negro (color 1) y cada anillo pasa a blanco (color 2) a su turno
+# (ix = parte del ciclo que espera en negro), de adentro hacia afuera; al final del ciclo se apaga todo junto.
+# WLED no deja desfasar strobos en el tiempo, por eso es una ola que se acumula y no un destello de a uno.
+# ORBE (ciclo 1.8 s): A-XS → B-S → A-M → B-L → A-XL + B-XL (los dos más grandes, cruzados, juntos)
+grandes = { fx = "Blink", sx = 165, ix = [213, 213, 171] }     # A-XL, B-XL, B-L
+chicos = { fx = "Blink", sx = 165, ix = [128, 43, 85] }        # A-M, A-XS, B-S
+# DIANA (ciclo 1.2 s, por su cuenta): D1 → D2 → D3 → D4
+diana = { fx = "Blink", sx = 195, ix = [51, 102, 154, 205] }
+# mismo fondo audio-rítmico que el Strobo, dibujado arriba
+puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
+puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
 id = 1
 nombre = "Test anillos"
 playlist = false
