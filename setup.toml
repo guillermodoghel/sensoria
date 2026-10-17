@@ -3,14 +3,14 @@
 
 [proyecto]
 nombre = "SENSORIA"
-look_activo = "agnosticos"      # archivo en looks/ que se sube a ORBITAS A
+look_activo = "agnosticos"      # archivo en looks/ que se sube a SUB ORBE A
 playlist = { id = 30, nombre = "Techno Oscuro", duracion_s = 600, transicion_s = 3 }
 brillo = 140                    # brillo general por defecto (0-255)
 
 # ---------------------------------------------------------------- red
 [red]
-casa = "LaSedeFA"               # wifi del lugar (ORBITAS A también se conecta acá)
-ap = "ORBITAS A"                # AP que levanta ORBITAS A; B y DIANA se conectan a este
+casa = "LaSedeFA"               # wifi del lugar (SUB ORBE A también se conecta acá)
+ap = "ORBITAS A"                # AP que levanta SUB ORBE A; B y DIANA se conectan a este
 ap_propuesto = "SENSORIA"       # renombre pendiente (ver docs/naming.md); no se aplica solo
 interfaz = "wlan0"              # wifi de la laptop, para saltar al AP
 
@@ -18,20 +18,20 @@ interfaz = "wlan0"              # wifi de la laptop, para saltar al AP
 # Los tres son Gledopto ESP32 (WLED 0.15.1 "ESP32_Ethernet"). A es el maestro: corre los efectos de los
 # 1104 LEDs y manda por DDP la parte de B y de DIANA. B y DIANA son receptores puros (sin presets).
 
-[controlador.orbitas-a]
-nombre = "ORBITAS A"
-mdns = "orbitas-a"
+[controlador.sub-orbe-a]
+nombre = "SUB ORBE A"
+mdns = "sub-orbe-a"
 rol = "maestro"
 lan = "192.168.68.50"           # IP fija en LaSedeFA
 ap_ip = "4.3.2.1"
 mic = "PDM (AudioReactive)"
 abl_ma = 15000
 
-[controlador.orbitas-b]
-nombre = "ORBITAS B"
-mdns = "orbitas-b"
+[controlador.sub-orbe-b]
+nombre = "SUB ORBE B"
+mdns = "sub-orbe-b"
 rol = "receptor DDP"
-ap_ip = "4.3.2.200"             # IP fija dentro del AP de ORBITAS A
+ap_ip = "4.3.2.200"             # IP fija dentro del AP de SUB ORBE A
 ap_respaldo = "ORBITAS B"
 abl_ma = 15000
 
@@ -45,8 +45,8 @@ fuente = "12V 3A + step-down a 5V (~6 A máx)"
 abl_ma = 5000                   # repartido por anillo, ver [[anillo]] abl_ma
 
 # ---------------------------------------------------------------- anillos
-# Orden = orden de los LEDs en la tira virtual de ORBITAS A (1104 LEDs).
-# ORBE: los 6 anillos colgados como un giroscopio desprolijo (controladores ORBITAS A y B) (los dos XL cruzados; el resto en cualquier ángulo),
+# Orden = orden de los LEDs en la tira virtual de SUB ORBE A (1104 LEDs).
+# ORBE: los 6 anillos colgados como un giroscopio desprolijo (controladores SUB ORBE A y B) (los dos XL cruzados; el resto en cualquier ángulo),
 # por eso los looks no deben depender de la orientación ni de dónde arranca cada tira.
 # Grupos: GRANDES = A-XL, B-XL, B-L · CHICOS = A-M, A-XS, B-S (juntos = ORBE) · DIANA = D1 (centro) .. D4 (afuera).
 
@@ -54,7 +54,7 @@ abl_ma = 5000                   # repartido por anillo, ver [[anillo]] abl_ma
 seg = 0
 nombre = "A-XL"
 leds = 186
-controlador = "orbitas-a"
+controlador = "sub-orbe-a"
 pin = 16
 grupo = "grandes"
 
@@ -62,7 +62,7 @@ grupo = "grandes"
 seg = 1
 nombre = "A-M"
 leds = 110
-controlador = "orbitas-a"
+controlador = "sub-orbe-a"
 pin = 12
 grupo = "chicos"
 
@@ -70,7 +70,7 @@ grupo = "chicos"
 seg = 2
 nombre = "A-XS"
 leds = 37
-controlador = "orbitas-a"
+controlador = "sub-orbe-a"
 pin = 4
 grupo = "chicos"
 
@@ -78,7 +78,7 @@ grupo = "chicos"
 seg = 3
 nombre = "B-S"
 leds = 73
-controlador = "orbitas-b"
+controlador = "sub-orbe-b"
 pin = 12
 grupo = "chicos"
 
@@ -86,7 +86,7 @@ grupo = "chicos"
 seg = 4
 nombre = "B-XL"
 leds = 186
-controlador = "orbitas-b"
+controlador = "sub-orbe-b"
 pin = 4
 grupo = "grandes"
 
@@ -94,7 +94,7 @@ grupo = "grandes"
 seg = 5
 nombre = "B-L"
 leds = 146
-controlador = "orbitas-b"
+controlador = "sub-orbe-b"
 pin = 2
 grupo = "grandes"
 
@@ -140,7 +140,7 @@ puntitos_orbitas = 10
 puntitos_diana = 16
 max = 19
 
-# ---------------------------------------------------------------- audio (AudioReactive en ORBITAS A)
+# ---------------------------------------------------------------- audio (AudioReactive en SUB ORBE A)
 [audio]
 squelch = 10
 ganancia = 60

@@ -5,12 +5,12 @@
 ```
 SENSORIA                          la instalación
 ├── ORBE                          los 6 anillos colgados como giroscopio
-│   ├── ORBITAS A  (maestro)      A-XL · A-M · A-XS
-│   └── ORBITAS B  (receptor)     B-S · B-XL · B-L
+│   ├── SUB ORBE A  (maestro)      A-XL · A-M · A-XS
+│   └── SUB ORBE B  (receptor)     B-S · B-XL · B-L
 └── DIANA          (receptor)     D1 · D2 · D3 · D4   (centro → afuera)
 ```
 
-- **ORBE** es la pieza física (los 6 anillos del giroscopio); **ORBITAS A** y **ORBITAS B** son los dos controladores que la manejan, 3 anillos cada uno.
+- **ORBE** es la pieza física (los 6 anillos del giroscopio). Está conformado por **SUB ORBE A** y **SUB ORBE B**, los dos controladores que lo manejan, con 3 anillos cada uno. Antes se llamaban ORBITAS A y ORBITAS B, y los wifi todavía conservan esos nombres.
 - **Anillos del ORBE:** se nombran `<controlador>-<talle>`, con XL 186 LEDs, L 146, M 110, S 73 y XS 37. El nombre dice a qué controlador y a qué ficha va cada anillo, y qué tamaño tiene, sin depender de cómo está colgado.
 - **Anillos de DIANA:** se numeran D1 a D4, del centro hacia afuera, porque ahí la posición radial sí importa.
 - **Grupos para los looks:**
@@ -20,16 +20,16 @@ SENSORIA                          la instalación
 
 ## Controladores
 
-| | ORBITAS A | ORBITAS B | DIANA |
+| | SUB ORBE A | SUB ORBE B | DIANA |
 |---|---|---|---|
-| Nombre en WLED (`id.name`) | ORBITAS A | ORBITAS B | DIANA |
-| mDNS | `orbitas-a` | `orbitas-b` | `diana` |
+| Nombre en WLED (`id.name`) | SUB ORBE A | SUB ORBE B | DIANA |
+| mDNS | `sub-orbe-a` | `sub-orbe-b` | `diana` |
 | IP en LaSedeFA | 192.168.68.50 (fija) | — | — |
 | IP en el AP de A | 4.3.2.1 | 4.3.2.200 (fija) | 4.3.2.201 (fija) |
-| AP de respaldo | `ORBITAS A` (siempre activo) | `ORBITAS B` | `BULLSEYE` → renombrar `DIANA` |
+| AP (nombre actual del wifi) | `ORBITAS A` (siempre activo) | `ORBITAS B` (respaldo) | `BULLSEYE` → renombrar `DIANA` |
 | Límite de corriente (ABL) | 15 A | 15 A | 5 A (500/1000/1500/2000 por anillo) |
 
-## Segmentos en ORBITAS A
+## Segmentos en SUB ORBE A
 
 | id | nombre | LEDs (tira virtual) | qué es |
 |---|---|---|---|
@@ -60,4 +60,4 @@ Los presets que no usan puntitos llevan `{"id":10..19,"stop":0}`, así al cambia
 ## Pendiente de decidir
 
 - **Renombrar el AP `ORBITAS A` a `SENSORIA`:** sería el nombre de la red de toda la instalación. Hay que cambiar primero el wifi de B y de DIANA y después el AP de A, estando en la obra, porque B y DIANA se quedan sin conexión hasta que el AP de A cambia de nombre.
-- **AP de respaldo de DIANA:** pasar de `BULLSEYE` a `DIANA`.
+- **APs de respaldo:** pasar `ORBITAS B` a `SUB ORBE B` y `BULLSEYE` a `DIANA`, desde `/settings/wifi` de cada uno.

@@ -7,7 +7,7 @@
   sensoria.py push --apply [dev ...]
   sensoria.py status                # who answers, uptime, current preset
 
-dev = orbitas-a | orbitas-b | diana (default: all). B and DIANA live only on ORBITAS A's AP, so reaching them
+dev = sub-orbe-a | sub-orbe-b | diana (default: all). B and DIANA live only on SUB ORBE A's AP, so reaching them
 means hopping the laptop's wifi to that AP and back; every hop restores the home network on exit.
 """
 import argparse, contextlib, copy, datetime, json, pathlib, subprocess, sys, time, tomllib, urllib.request, uuid
@@ -142,10 +142,10 @@ class Compiler:
         pr, au, c = self.s["proyecto"], self.s["audio"], self.s["controlador"]
         diana_abl = {str(r["leds"]): r["abl_ma"] for r in self.diana_rings}
         return {
-            "orbitas-a": {"id": {"name": c["orbitas-a"]["nombre"], "mdns": c["orbitas-a"]["mdns"]},
+            "sub-orbe-a": {"id": {"name": c["sub-orbe-a"]["nombre"], "mdns": c["sub-orbe-a"]["mdns"]},
                           "def": {"ps": pr["playlist"]["id"], "on": True, "bri": pr["brillo"]},
                           "um": {"AudioReactive": {"config": {"squelch": au["squelch"], "gain": au["ganancia"], "AGC": au["agc"]}}}},
-            "orbitas-b": {"id": {"name": c["orbitas-b"]["nombre"], "mdns": c["orbitas-b"]["mdns"]}},
+            "sub-orbe-b": {"id": {"name": c["sub-orbe-b"]["nombre"], "mdns": c["sub-orbe-b"]["mdns"]}},
             "diana": {"id": {"name": c["diana"]["nombre"], "mdns": c["diana"]["mdns"]},
                       "_abl_por_bus": diana_abl, "_abl_total": c["diana"]["abl_ma"]},
         }
@@ -155,7 +155,7 @@ def cmd_build(_args):
     setup, looks = load()
     comp = Compiler(setup)
     presets = comp.presets(looks)
-    a = BUILD / "orbitas-a"
+    a = BUILD / "sub-orbe-a"
     a.mkdir(parents=True, exist_ok=True)
     (a / "presets.json").write_text(json.dumps(presets, separators=(",", ":")))
     for name, data in comp.palettes().items():
@@ -260,7 +260,7 @@ def reachable(url):
 
 
 def route(setup, dev):
-    """(ssid to join or None, base url). ORBITAS A is tried on the home LAN first."""
+    """(ssid to join or None, base url). SUB ORBE A is tried on the home LAN first."""
     c = setup["controlador"][dev]
     if c.get("lan") and reachable("http://" + c["lan"]):
         return None, "http://" + c["lan"]
@@ -300,14 +300,14 @@ def cmd_push(args):
     setup, _ = load()
     cmd_build(args)
     plan = []
-    if "orbitas-a" in args.dev:
-        a = BUILD / "orbitas-a"
-        plan += [("orbitas-a", "upload", p.name, p.read_bytes()) for p in sorted(a.glob("palette*.json"))]
-        plan += [("orbitas-a", "upload", "presets.json", (a / "presets.json").read_bytes()),
-                 ("orbitas-a", "cfg", None, json.loads((BUILD / "orbitas-a/cfg.patch.json").read_text())),
-                 ("orbitas-a", "start", None, setup["proyecto"]["playlist"]["id"])]
-    if "orbitas-b" in args.dev:
-        plan.append(("orbitas-b", "cfg", None, json.loads((BUILD / "orbitas-b/cfg.patch.json").read_text())))
+    if "sub-orbe-a" in args.dev:
+        a = BUILD / "sub-orbe-a"
+        plan += [("sub-orbe-a", "upload", p.name, p.read_bytes()) for p in sorted(a.glob("palette*.json"))]
+        plan += [("sub-orbe-a", "upload", "presets.json", (a / "presets.json").read_bytes()),
+                 ("sub-orbe-a", "cfg", None, json.loads((BUILD / "sub-orbe-a/cfg.patch.json").read_text())),
+                 ("sub-orbe-a", "start", None, setup["proyecto"]["playlist"]["id"])]
+    if "sub-orbe-b" in args.dev:
+        plan.append(("sub-orbe-b", "cfg", None, json.loads((BUILD / "sub-orbe-b/cfg.patch.json").read_text())))
     if "diana" in args.dev:
         plan.append(("diana", "cfg", None, json.loads((BUILD / "diana/cfg.patch.json").read_text())))
     for dev, kind, name, payload in plan:
@@ -361,7 +361,7 @@ def main():
     sub.add_parser("build")
     for name in ("backup", "push", "status"):
         p = sub.add_parser(name)
-        p.add_argument("dev", nargs="*", default=["orbitas-a", "orbitas-b", "diana"])
+        p.add_argument("dev", nargs="*", default=["sub-orbe-a", "sub-orbe-b", "diana"])
         if name == "push":
             p.add_argument("--apply", action="store_true")
     args = ap.parse_args()

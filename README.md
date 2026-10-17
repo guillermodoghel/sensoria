@@ -1,6 +1,6 @@
 # SENSORIA
 
-Instalación de luz audio-reactiva: el **ORBE**, seis anillos LED colgados como un giroscopio y manejados por los controladores ORBITAS A y ORBITAS B, y la **DIANA**, cuatro anillos concéntricos. Todo lo maneja WLED en tres controladores Gledopto ESP32.
+Instalación de luz audio-reactiva: el **ORBE**, seis anillos LED colgados como un giroscopio y manejados por los controladores SUB ORBE A y SUB ORBE B, y la **DIANA**, cuatro anillos concéntricos. Todo lo maneja WLED en tres controladores Gledopto ESP32.
 
 Este repo es la fuente de verdad del setup: hardware, red, looks (presets), paletas y config de audio están en archivos de texto. `tools/sensoria.py` los compila y los sube a los controladores. También hace backups y arma un simulador 3D.
 
@@ -8,11 +8,11 @@ Este repo es la fuente de verdad del setup: hardware, red, looks (presets), pale
 
 | Controlador | Rol | Red | Anillos (LEDs · pin) |
 |---|---|---|---|
-| **ORBITAS A** | maestro: corre todos los efectos y escucha el micrófono | `192.168.68.50` en LaSedeFA · AP `ORBITAS A` en `4.3.2.1` | A-XL (186 · 16), A-M (110 · 12), A-XS (37 · 4) |
-| **ORBITAS B** | receptor DDP | `4.3.2.200` dentro del AP de A | B-S (73 · 12), B-XL (186 · 4), B-L (146 · 2) |
+| **SUB ORBE A** | maestro: corre todos los efectos y escucha el micrófono | `192.168.68.50` en LaSedeFA · AP `ORBITAS A` en `4.3.2.1` | A-XL (186 · 16), A-M (110 · 12), A-XS (37 · 4) |
+| **SUB ORBE B** | receptor DDP | `4.3.2.200` dentro del AP de A | B-S (73 · 12), B-XL (186 · 4), B-L (146 · 2) |
 | **DIANA** (ex BULLSEYE) | receptor DDP | `4.3.2.201` dentro del AP de A | D1 centro (37 · 2), D2 (73 · 4), D3 (110 · 16), D4 afuera (146 · 12) |
 
-ORBITAS A arma una tira virtual de 1104 LEDs (A, después B, después DIANA) y manda por DDP la parte de B y de DIANA. B y DIANA no tienen presets propios.
+SUB ORBE A arma una tira virtual de 1104 LEDs (A, después B, después DIANA) y manda por DDP la parte de B y de DIANA. B y DIANA no tienen presets propios.
 
 **Grupos que usan los looks** (GRANDES + CHICOS = ORBE):
 - **GRANDES:** A-XL, B-XL y B-L. Los dos XL son los que se cruzan.
@@ -41,7 +41,7 @@ python3 tools/sensoria.py push --apply     # lo manda (hacé backup antes)
 tools/simulador.sh                         # abre el simulador local (con micrófono / audio de la PC)
 ```
 
-- **Cómo llega a cada controlador:** a ORBITAS A entra por LaSedeFA y, si no contesta, por su AP. A B y a DIANA solo se llega desde el AP de A, así que el script cambia el wifi de la laptop a `ORBITAS A` y lo devuelve a LaSedeFA al terminar.
+- **Cómo llega a cada controlador:** a SUB ORBE A entra por LaSedeFA y, si no contesta, por su AP. A B y a DIANA solo se llega desde el AP de A, así que el script cambia el wifi de la laptop a `ORBITAS A` y lo devuelve a LaSedeFA al terminar.
 - **Look que se sube:** el de `proyecto.look_activo` en `setup.toml`, que apunta a un archivo de `looks/`.
 
 ## Simulador

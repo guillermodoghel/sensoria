@@ -1,6 +1,6 @@
 # ORBITAS WLED backup 2026-10-17
 
-- A/ master 192.168.68.50 (LaSedeFA) / 4.3.2.1 (AP "ORBITAS A"): 6 rings + DDP to B (.200) and BULLSEYE (.201)
+- A/ master 192.168.68.50 (LaSedeFA) / 4.3.2.1 (AP "SUB ORBE A"): 6 rings + DDP to B (.200) and BULLSEYE (.201)
 - B/ 4.3.2.200 pure DDP receiver
 - C/ BULLSEYE 4.3.2.201 pure DDP receiver, per-bus ABL 500/1000/1500/2000 (12V 3A + stepdown)
 
