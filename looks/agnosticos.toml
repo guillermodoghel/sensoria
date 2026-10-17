@@ -114,9 +114,8 @@ puntitos_diana = { fx = "Two Dots", color = "celeste", sx = [130, 100, 80, 60], 
 id = 22
 nombre = "Celeste"
 playlist = false
-brillo = 220
-paleta = "colors-only"
-color = ["azul", "celeste", "azul"]
+paleta = "azul-celeste"
+color = "azul"          # fondo negro: con celeste de fondo los anillos quedaban llenos aunque no sonara nada
 grandes = { fx = "Gravcenter", sx = 160, ix = 150 }
 chicos = { fx = ["Puddlepeak", "Ripple Peak", "Puddlepeak"], sx = 160, ix = 150, c1 = 8 }
 diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80], paleta = "color1", colores = ["azul", "celeste", "azul", "celeste"] }
