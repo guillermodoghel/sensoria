@@ -55,7 +55,7 @@ paleta = "rojo-azul"
 color = "rojo"
 grandes = { fx = "Ripple Peak", sx = 128, ix = 64 }
 chicos = { fx = "Ripple Peak", sx = 128, ix = 64 }
-diana = { fx = "Plasmoid", sx = 40, ix = 110, paleta = "color1", colores = ["rojo", "azul", "rojo", "azul"] }
+diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80] }   # mismas ondas que las órbitas; más ondas hacia afuera
 
 [[look]]
 id = 15
