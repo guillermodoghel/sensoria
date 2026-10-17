@@ -11,7 +11,8 @@ brillo = 140                    # brillo general por defecto (0-255)
 [red]
 casa = "LaSedeFA"               # wifi del lugar (SUB ORBE A también se conecta acá)
 ap = "ORBITAS A"                # AP que levanta SUB ORBE A; B y DIANA se conectan a este
-ap_propuesto = "SENSORIA"       # renombre pendiente (ver docs/naming.md); no se aplica solo
+ap_propuesto = "SUB ORBE A"     # renombre pendiente en la obra (ver docs/naming.md); no se aplica solo
+aps_respaldo_propuestos = { sub-orbe-b = "SUB ORBE B", diana = "DIANA" }
 interfaz = "wlan0"              # wifi de la laptop, para saltar al AP
 
 # ---------------------------------------------------------------- controladores

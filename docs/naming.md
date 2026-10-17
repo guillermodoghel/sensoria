@@ -57,7 +57,16 @@ Los presets que no usan puntitos llevan `{"id":10..19,"stop":0}`, así al cambia
 - **ORBE:** A-XL rojo, B-XL magenta, B-L amarillo, A-M verde, A-XS azul, B-S celeste.
 - **DIANA:** D1 rojo, D2 verde, D3 azul, D4 magenta.
 
-## Pendiente de decidir
+## Pendiente: renombrar los wifi (en la obra)
 
-- **Renombrar el AP `ORBITAS A` a `SENSORIA`:** sería el nombre de la red de toda la instalación. Hay que cambiar primero el wifi de B y de DIANA y después el AP de A, estando en la obra, porque B y DIANA se quedan sin conexión hasta que el AP de A cambia de nombre.
-- **APs de respaldo:** pasar `ORBITAS B` a `SUB ORBE B` y `BULLSEYE` a `DIANA`, desde `/settings/wifi` de cada uno.
+| Wifi | Hoy | Nuevo |
+|---|---|---|
+| AP principal (lo levanta SUB ORBE A) | `ORBITAS A` | `SUB ORBE A` |
+| Respaldo de SUB ORBE B | `ORBITAS B` | `SUB ORBE B` |
+| Respaldo de DIANA | `BULLSEYE` | `DIANA` |
+
+Orden para no perder a nadie:
+1. **En SUB ORBE B y en DIANA:** cambiar el wifi al que se conectan, de `ORBITAS A` a `SUB ORBE A`, y de paso su AP de respaldo. Desde ese momento quedan desconectados, y se los ve por su AP de respaldo.
+2. **En SUB ORBE A:** renombrar el AP a `SUB ORBE A`. B y DIANA se reconectan solos.
+3. **En `setup.toml`:** `red.ap = "SUB ORBE A"`.
+4. **En la laptop:** con `iwctl`, olvidar `ORBITAS A` y dejar la red nueva sin conexión automática, como las demás redes de los WLED.

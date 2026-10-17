@@ -24,8 +24,7 @@ python3 tools/sensoria.py status
 3. **Commit** con el backup nuevo.
 
 ## Opcional (decidir en la obra)
-- **Renombrar el AP a `SENSORIA`:** ver `docs/naming.md`. Primero se cambia el wifi de B y de DIANA, después el AP de A, y por último `red.ap` en `setup.toml`.
-- **APs de respaldo:** pasar `ORBITAS B` a `SUB ORBE B` y `BULLSEYE` a `DIANA`, desde `/settings/wifi` de cada uno.
+- **Renombrar los wifi:** `ORBITAS A` → `SUB ORBE A`, `ORBITAS B` → `SUB ORBE B`, `BULLSEYE` → `DIANA`. El orden está en `docs/naming.md`.
 
 ## Volver atrás
 `backups/<fecha>/sub-orbe-a/` tiene `presets.json`, `cfg.json` y las paletas. Para restaurar:
