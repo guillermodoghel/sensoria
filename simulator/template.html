@@ -351,7 +351,7 @@ const opa=new Uint8Array(TOTAL).fill(255);
 let segs=[]; // runtime segments
 let GBRI=140;
 function makeSeg(d){
-  const s=Object.assign({sx:128,ix:128,c1:128,pal:0,col:[RED,BLK,BLK],bri:255,rev:false,o2:false},JSON.parse(JSON.stringify(d)));
+  const s=Object.assign({sx:128,ix:128,c1:128,c2:128,c3:16,pal:0,col:[RED,BLK,BLK],bri:255,rev:false,o2:false},JSON.parse(JSON.stringify(d)));
   s.len=s.stop-s.start; s.data={}; s.call=0; s.palArr=buildPal(s.pal,s.col); return s;
 }
 function idx(s,i){return s.start+(s.rev?s.len-1-i:i);}
@@ -401,12 +401,50 @@ function blinkFx(s,strobe){
   const it=Math.floor(NOW/cyc), on=it!==s.data.st||NOW%cyc<=on_t; s.data.st=it;
   if(on){for(let i=0;i<s.len;i++)setPx(s,i,cpal(s,i*255/s.len));} else fill(s,s.col[1]);
 }
+/* SENSORIA firmware effects: ports of firmware/usermod_strobe_fase/usermod_strobe_fase.h (shared state between rings) */
+function sensoriaKick(s){ // kick strength 0..1 (samplePeak gated by warrolight's musicFlash curve), 0 if no kick
+  if(!S.peak) return 0; const bass=(S.fft[0]+S.fft[1]+S.fft[2])/765, cut=(s.c3??12)*0.8/31;
+  if(bass<=cut) return 0; const v=(bass-cut)/(1-cut); return Math.min(1,v*v);
+}
+function sensoriaFill(s,level){
+  if(level>0.01){const b=Math.min(1,level)*255;for(let i=0;i<s.len;i++)setPx(s,i,cpal(s,i*255/s.len,b));}
+  else if(!s.o2) fill(s,s.col[1]);
+}
+const azarGroups={};
+function anilloAzar(s){
+  const g=azarGroups[(s.c2??0)>>5]||(azarGroups[(s.c2??0)>>5]={frame:-1,seen:new Set(),members:[],t0:-1e9,chosen:-1,last:-1,level:0});
+  if(g.frame!==NOW){
+    g.frame=NOW; g.members=[...new Set([...g.seen,s.id])]; g.seen=new Set();
+    const kick=sensoriaKick(s);
+    if(kick>0&&NOW-g.t0>60+(s.c1??40)*4){
+      let pick=-1; for(let t=0;t<8;t++){pick=g.members[rnd(g.members.length)]; if(pick!==g.last||g.members.length<2)break;}
+      g.chosen=g.last=pick; g.t0=NOW; g.level=0.35+0.65*kick;
+    }
+  }
+  g.seen.add(s.id);
+  const tau=30+(255-s.sx)*2;
+  sensoriaFill(s, s.id===g.chosen ? g.level*Math.exp(-(NOW-g.t0)/tau) : 0);
+}
+const onda={frame:-1,waves:[],last:-1e9};
+function ondaRadial(s){
+  if(onda.frame!==NOW){
+    onda.frame=NOW; onda.waves=onda.waves.filter(w=>NOW-w.t0<=3000);
+    const kick=sensoriaKick(s);
+    if(kick>0&&NOW-onda.last>60+(s.c1??30)*4){onda.last=NOW;onda.waves.push({t0:NOW,strength:kick});if(onda.waves.length>8)onda.waves.shift();}
+  }
+  const r=(s.c2??128)/255, vel=0.4+s.sx*3.6/255, width=0.08+s.ix*0.5/255;
+  let level=0;
+  for(const w of onda.waves){const radius=(NOW-w.t0)/1000*vel*(0.6+0.8*w.strength), d=Math.abs(radius-r), fo=1-radius/1.4; if(d<width&&fo>0) level+=w.strength*(1-d/width)*fo;}
+  sensoriaFill(s,level);
+}
 function secondHand(s){const st=Math.floor(NOW/((256-s.sx)*0.5));if(s.data.sh!==st){s.data.sh=st;return true;}return false;}
 const FX={
   0:{n:"Solid",f:s=>fill(s,s.col[0])},
   9:{n:"Rainbow",f:s=>{for(let i=0;i<s.len;i++)setPx(s,i,cpal(s,i*256/s.len+NOW*s.sx/2000));}},
   1:{n:"Blink",sxL:"Período",ixL:"Tiempo en color 1",f:s=>blinkFx(s,false)},
   23:{n:"Strobe",sxL:"Período",f:s=>blinkFx(s,true)},
+  142:{n:"Anillo Azar (firmware)",sxL:"Caída",f:anilloAzar},
+  151:{n:"Onda Radial (firmware)",sxL:"Velocidad",ixL:"Ancho",f:ondaRadial},
   53:{n:"Strobe Fase (firmware)",sxL:"Período",ixL:"Duración",f:s=>{ // SENSORIA firmware: strobe flashing at phase c1 of its cycle
     const cyc=50+(255-s.sx)*20, on=FRAMETIME+cyc*s.ix/256, ph=cyc*(s.c1??0)/256, t=(NOW+cyc-ph)%cyc;
     if(t<on){for(let i=0;i<s.len;i++)setPx(s,i,cpal(s,i*255/s.len));} else if(!s.o2) fill(s,s.col[1]);}},
@@ -460,7 +498,7 @@ const FX={
   158:{n:"Gravfreq",audio:1,sxL:"Caída",ixL:"Sensibilidad",f:s=>grav(s,2)},
   163:{n:"Blurz",audio:1,f:s=>{fadeOut(s,s.sx);const b=s.call%16;const v=S.fft[b];if(v>10)setPx(s,rnd(s.len),blend(s.col[1],cpal(s,b*16),v));blur(s,s.ix);}},
 };
-const FX_ORDER=[156,157,158,132,155,141,135,136,145,133,130,129,131,140,163,134,144,148,50,23,53,1,41,9,0];
+const FX_ORDER=[156,157,158,132,155,141,135,136,145,133,130,129,131,140,163,134,144,148,50,23,53,142,151,1,41,9,0];
 
 /* ---------- presets / state ---------- */
 let curPreset=null, edited={}, groupSel="outer";
@@ -484,12 +522,12 @@ function loadPreset(id,keepPlaylist,step){
 function curGroupSegs(){return segs.filter(s=>GROUPS[groupSel].ids.includes(s.id));}
 function writeBack(){ // runtime segs -> edited preset data
   const p=edited[curPreset]; p.bri=GBRI;
-  p.seg=segs.map(s=>({id:s.id,start:s.start,stop:s.stop,fx:s.fx,sx:s.sx,ix:s.ix,c1:s.c1,pal:s.pal,col:s.col,bri:s.bri,rev:s.rev,o2:s.o2}));
+  p.seg=segs.map(s=>({id:s.id,start:s.start,stop:s.stop,fx:s.fx,sx:s.sx,ix:s.ix,c1:s.c1,c2:s.c2,c3:s.c3,pal:s.pal,col:s.col,bri:s.bri,rev:s.rev,o2:s.o2}));
   updateJSON();
 }
 function updateJSON(){
   const p=edited[curPreset]; if(!p)return;
-  const st={on:true,bri:GBRI,seg:p.seg.map(s=>({id:s.id,start:s.start,stop:s.stop,fx:s.fx,sx:s.sx,ix:s.ix,c1:s.c1,pal:s.pal,col:s.col,bri:s.bri,rev:s.rev,o2:s.o2}))};
+  const st={on:true,bri:GBRI,seg:p.seg.map(s=>({id:s.id,start:s.start,stop:s.stop,fx:s.fx,sx:s.sx,ix:s.ix,c1:s.c1,c2:s.c2,c3:s.c3,pal:s.pal,col:s.col,bri:s.bri,rev:s.rev,o2:s.o2}))};
   const used=new Set(st.seg.map(s=>s.id)); for(let i=0;i<=19;i++) if(!used.has(i)) st.seg.push({id:i,stop:0});
   document.getElementById('jsonOut').value=JSON.stringify({n:p.n+(isEdited(p.id)?" (editado)":""),...st});
 }
@@ -619,16 +657,15 @@ function output(){
 }
 
 /* ---------- loop ---------- */
-let last=performance.now(), acc=0, plT=0, meterT=0;
+let SIMT=performance.now(), last=performance.now(), acc=0, plT=0, meterT=0;
 function tick(){
-  NOW=performance.now();
   for(const s of segs){ s._ov = s.o2 ? new Set() : null; const fx=FX[s.fx]||FX[0]; fx.f(s); s.call++; }
   output();
 }
 function frame(t){
   const dt=Math.min(100,t-last); last=t; acc+=dt;
   let ticked=false;
-  while(acc>=FRAMETIME){acc-=FRAMETIME;analyse(FRAMETIME);tick();ticked=true;}
+  while(acc>=FRAMETIME){acc-=FRAMETIME;SIMT+=FRAMETIME;NOW=SIMT;analyse(FRAMETIME);tick();ticked=true;} // each WLED frame gets its own instant, like strip.now
   if(seq){seq.t+=dt;if(seq.t>=seq.dur){seq.t-=seq.dur;seq.i=(seq.i+1)%seq.steps.length;loadPreset(seq.steps[seq.i],true,true);}}
   if($('plOn').checked){plT+=dt/1000;if(plT>=+$('plDur').value){plT=0;const i=PLAYLIST.indexOf(curPreset);loadPreset(PLAYLIST[(i+1)%PLAYLIST.length],true);}}
   if(ticked){meterT+=dt;const bars=$('geq').children;for(let i=0;i<16;i++)bars[i].style.height=(2+S.fft[i]/255*44)+"px";$('volBar').style.height=(S.vol/255*100)+"%";$('peakDot').classList.toggle('on',S.peak||NOW-lastPeak<90);}

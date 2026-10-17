@@ -152,6 +152,34 @@ puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color =
 puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
 
 [[look]]
+id = 25
+nombre = "Anillo Azar"
+requiere_firmware = "strobe_fase"
+duracion_s = 30
+paleta = "color1"
+color = "blanco"
+# Con cada bombo destella UN anillo al azar del ORBE y otro de la DIANA (grupos separados con c2), nunca el mismo
+# dos veces seguidas. Idea de warrolight (randomShapes). c1 = separación mínima, sx = caída, c3 = umbral del bombo.
+grandes = { fx = "Anillo Azar", sx = 160, c1 = 40, c2 = 0, c3 = 12 }
+chicos = { fx = "Anillo Azar", sx = 160, c1 = 40, c2 = 0, c3 = 12 }
+diana = { fx = "Anillo Azar", sx = 160, c1 = 40, c2 = 32, c3 = 12 }
+puntitos = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "rojo-magenta", color = "rojo" }
+puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 70, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+
+[[look]]
+id = 26
+nombre = "Onda Radial"
+requiere_firmware = "strobe_fase"
+paleta = "color1"
+# Cada bombo manda una onda del centro hacia afuera; cada anillo se prende entero cuando la onda pasa por su radio
+# (c2 = radio por tamaño: en el ORBE anidado, el más chico es el de adentro). Idea de warrolight (sound-waves).
+grandes = { fx = "Onda Radial", sx = 120, ix = 60, c1 = 30, c3 = 12, c2 = [255, 255, 200], color = "rojo" }   # A-XL, B-XL, B-L
+chicos = { fx = "Onda Radial", sx = 120, ix = 60, c1 = 30, c3 = 12, c2 = [151, 51, 100], color = "rojo" }     # A-M, A-XS, B-S
+diana = { fx = "Onda Radial", sx = 90, ix = 60, c1 = 30, c3 = 12, c2 = [64, 128, 191, 255], color = "magenta" }
+puntitos = { fx = "Plasmoid", sx = 90, ix = 50, paleta = "magenta-azul", color = "azul" }
+puntitos_diana = { fx = "Plasmoid", sx = 90, ix = 50, paleta = "color1", color = "azul" }
+
+[[look]]
 id = 1
 nombre = "Test anillos"
 playlist = false

@@ -47,14 +47,15 @@ El binario está en `firmware/dist/`. Para recompilarlo: `firmware/build.sh`. Es
 ```sh
 python3 tools/sensoria.py ota sub-orbe-b --apply    # primero en B: mismo hardware, si algo sale mal solo se apaga un receptor
 python3 tools/sensoria.py ota sub-orbe-a --apply    # si B volvió bien y lista "Strobe Fase (id 53)"
+# en B se pueden probar los efectos nuevos a mano desde su interfaz antes de pasar a A
 ```
 **Después:**
 1. **Activar el firmware en la config:** `[firmware] strobe_fase = true` en `setup.toml`.
-2. **Volver a subir:** `push --apply`. Strobo Ola pasa a ser el preset 24, un solo destello por anillo, y la secuencia de presets 31 deja de usarse.
+2. **Volver a subir:** `push --apply`. Strobo Ola pasa a ser el preset 24, un solo destello por anillo, y la secuencia de presets 31 deja de usarse. Entran a la playlist Anillo Azar (25, 30 s: un anillo al azar con cada bombo) y Onda Radial (26, 10 min: onda del centro hacia afuera con cada bombo).
 3. **Verificar el 24:** de a un anillo por vez, de adentro hacia afuera, ORBE y DIANA cada uno a su ritmo, con el plasma de fondo.
 
 **Los binarios en `firmware/dist/`:**
-- `sensoria-*.bin`: WLED 0.15.1 con los cambios del fork de Gledopto (Ethernet tipo 13, relé 18, botón 17, micrófono) más Strobe Fase.
+- `sensoria-*.bin`: WLED 0.15.1 con los cambios del fork de Gledopto (Ethernet tipo 13, relé 18, botón 17, micrófono) más los tres efectos propios: Strobe Fase (53), Anillo Azar (142) y Onda Radial (151).
 - `plain-*.bin`: lo mismo sin nuestro efecto, equivalente a lo que traen las placas.
 
 **Para volver atrás:**

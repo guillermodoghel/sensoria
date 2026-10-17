@@ -59,7 +59,7 @@ tools/simulador.sh                         # abre el simulador local (con micró
 - `setup.toml`: hardware, red, anillos, audio, colores y paletas.
 - `looks/`: un archivo de looks por set. `agnosticos.toml` es la propuesta actual.
 - `tools/sensoria.py`: compilar, backup, push, status, OTA y renombre de wifi.
-- `firmware/`: WLED 0.15.1 + efecto "Strobe Fase" (strobo con fase por segmento); `build.sh` compila y `dist/` tiene el binario.
+- `firmware/`: WLED 0.15.1 (fork Gledopto) + efectos propios que comparten estado entre anillos: Strobe Fase, Anillo Azar y Onda Radial (estos dos, ideas de [warrolight](https://github.com/PampaWarro/warrolight)). `build.sh` compila; `dist/` tiene el binario y uno "plain" para volver atrás.
 - `simulator/template.html`: fuente del simulador; `build` le inyecta los presets.
 - `backups/`: snapshots de los tres controladores.
 - `docs/`: nombres, notas técnicas de WLED, historial y plan de deploy.

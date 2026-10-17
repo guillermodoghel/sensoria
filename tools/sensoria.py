@@ -103,7 +103,7 @@ class Compiler:
                 "col": self.cols(p.get("color", look.get("color", "rojo"))),
                 "fx": self.fx(p.get("fx", "Solid")), "sx": p.get("sx", 128), "ix": p.get("ix", 128),
                 "pal": self.pal(p.get("paleta", look.get("paleta", "color1"))),
-                "c1": p.get("c1", 128), "c2": 128, "c3": 16, "sel": False, "rev": p.get("rev", False), "mi": False,
+                "c1": p.get("c1", 128), "c2": p.get("c2", 128), "c3": p.get("c3", 16), "sel": False, "rev": p.get("rev", False), "mi": False,
                 "o1": False, "o2": p.get("o2", False), "o3": False, "si": 0, "m12": 0}
 
     def preset(self, look):
@@ -233,7 +233,7 @@ def build_simulator(comp, presets, setup, preview=()):
             continue
         if "seg" not in p:
             continue
-        segs = [{f: s[f] for f in ("id", "start", "stop", "fx", "sx", "ix", "c1", "pal", "col", "bri", "rev", "o2")}
+        segs = [{f: s[f] for f in ("id", "start", "stop", "fx", "sx", "ix", "c1", "c2", "c3", "pal", "col", "bri", "rev", "o2")}
                 for s in p["seg"] if s.get("stop", 0)]
         sim.append({"id": int(k), "n": p["n"], "bri": p["bri"], "seg": segs, **({"hidden": True} if int(k) in step_ids else {})})
     sim.sort(key=lambda x: (x["id"] < 10, x["id"]))
