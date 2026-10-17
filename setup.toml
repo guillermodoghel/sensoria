@@ -13,7 +13,7 @@ brillo = 64                     # brillo general de todos los looks y al arranca
 # un solo preset con un destello por anillo. Con false se usa la versión de mini-playlist (secuencia de presets).
 [firmware]
 strobe_fase = false
-bin = "firmware/dist/sensoria-wled-0.15.1-ESP32_Ethernet.bin"
+bin = "firmware/dist/sensoria-wled-0.15.1-gledopto-ESP32_Ethernet.bin"
 
 # ---------------------------------------------------------------- red
 [red]

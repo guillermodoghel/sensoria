@@ -12,6 +12,10 @@ Objetivo: dejar SENSORIA con todo lo nuevo.
 Cada paso deja todo andando, así que se puede cortar en cualquier punto.
 
 ## 0. Antes de empezar
+- **Identificar las placas antes de cualquier OTA:**
+  - **Hardware:** mirar la etiqueta. Creemos que son Gledopto Elite 4D-EXMU (GL-C-618WL): 4 salidas, Ethernet, micrófono y USB-C.
+  - **Firmware:** en `/json/info` tiene que decir `ver` 0.15.1 y `release` ESP32_Ethernet, y en `/json/cfg` tiene que aparecer Ethernet tipo 13 (solo lo tiene el fork de Gledopto).
+  - **Si no coincide:** no flashear, y recompilar sobre la base que corresponda.
 - **Red de la laptop:** conectada a LaSedeFA, con los tres controladores prendidos.
 - **Status:** `python3 tools/sensoria.py status`. Tienen que responder los tres.
 - **Backup:** `python3 tools/sensoria.py backup`, para guardar cómo está todo antes de tocar. Commitear.
@@ -49,9 +53,16 @@ python3 tools/sensoria.py ota sub-orbe-a --apply    # si B volvió bien y lista 
 2. **Volver a subir:** `push --apply`. Strobo Ola pasa a ser el preset 24, un solo destello por anillo, y la secuencia de presets 31 deja de usarse.
 3. **Verificar el 24:** de a un anillo por vez, de adentro hacia afuera, ORBE y DIANA cada uno a su ritmo, con el plasma de fondo.
 
-**Si algo sale mal:**
-- **B no vuelve después del OTA:** conectarlo por USB y flashear el bin oficial `WLED_0.15.1_ESP32_Ethernet.bin` desde install.wled.me.
-- **Para volver atrás sin USB:** en `http://<ip>/update` subir el bin oficial.
+**Los binarios en `firmware/dist/`:**
+- `sensoria-*.bin`: WLED 0.15.1 con los cambios del fork de Gledopto (Ethernet tipo 13, relé 18, botón 17, micrófono) más Strobe Fase.
+- `plain-*.bin`: lo mismo sin nuestro efecto, equivalente a lo que traen las placas.
+
+**Para volver atrás:**
+- **Sin USB:** subir `plain-*.bin` por OTA (`http://<ip>/update`).
+- **Si B no vuelve después del OTA:** conectarlo por USB-C a la laptop y correr `firmware/recuperar-usb.sh`. Graba `plain-*.bin` solo en la partición del programa, así que conserva la configuración y los presets.
+  - **Permiso para el puerto:** hace falta el grupo `uucp`, o correr el script con sudo.
+  - **Si no conecta:** desenchufar, mantener apretado el botón de la placa, volver a enchufar y reintentar.
+  - **Última opción:** el flasher web de Gledopto (gledopto.com/h-col-381.html, desde Chrome), que instala su 0.15.4 o 16.x.
 
 ## 3. Nombres de los wifi
 ```sh
