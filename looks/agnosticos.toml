@@ -136,7 +136,6 @@ diana = { fx = "Strobe", sx = [160, 100, 50, 20] }
 id = 1
 nombre = "Test anillos"
 playlist = false
-brillo = 80
 paleta = "color1"
 grandes = { fx = "Solid", colores = ["rojo", "magenta", "amarillo"] }
 chicos = { fx = "Solid", colores = ["verde", "azul", "celeste"] }

@@ -5,7 +5,7 @@
 nombre = "SENSORIA"
 look_activo = "agnosticos"      # archivo en looks/ que se sube a SUB ORBE A
 playlist = { id = 30, nombre = "Techno Oscuro", duracion_s = 600, transicion_s = 3 }
-brillo = 140                    # brillo general por defecto (0-255)
+brillo = 64                     # brillo general de todos los looks y al arrancar: 25% (0-255)
 
 # ---------------------------------------------------------------- red
 [red]
