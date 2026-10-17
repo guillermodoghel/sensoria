@@ -18,7 +18,7 @@
 - **Nombres:** BULLSEYE pasa a llamarse DIANA y se arma el proyecto SENSORIA. Anillos A-XL…B-L, D1…D4. Grupos GRANDES, CHICOS y DIANA.
 - **Propuesta "agnósticos"** (`looks/agnosticos.toml`):
   - **ORBITAS:** efectos que no dependen de cómo cuelgan los anillos.
-  - **DIANA:** 4 segmentos, uno por anillo, con efectos que resaltan los círculos.
+  - **DIANA:** 4 segmentos, uno por anillo, con efectos que resaltan los círculos y no dependen de dónde arranca cada tira (sin Gravcenter ni Noisemeter).
   - **Estado:** todavía no subida.
 
 **Lo que está cargado en los controladores hoy** es el set de presets del 2026-10-17 (ver `backups/2026-10-17/orbitas-a/presets.json`): DIANA como un solo segmento (6) con Noisemeter invertido, y los puntitos en los segmentos 7–12.

@@ -2,10 +2,10 @@
 # ORBITAS: nada depende de la orientación de los anillos ni de dónde arranca cada tira
 #   (texturas, puntos que recorren el anillo, puntitos orbitando). Sin Gravcentric (punta gris) ni Waterfall (verde pálido).
 # DIANA: efectos que resaltan los 4 círculos concéntricos, un segmento por anillo (D1 centro .. D4 afuera).
-#   cierre   = Gravcenter por anillo: cada círculo se cierra con el volumen, el centro es el más sensible
-#              (ojo: crece en U desde la mitad de cada tira, así que depende de dónde arranca)
-#   textura  = Plasmoid por anillo con colores alternados: siempre se leen los 4 círculos
-#   ruido    = Noisemove por anillo con colores alternados: puntos que se mueven por todo el círculo
+#   Ninguno depende de dónde arranca cada tira (nada de Gravcenter/Noisemeter, que crecen en U o en arco desde un punto).
+#   Los anillos alternan dos colores para que siempre se lean los 4 círculos.
+#   textura  = Plasmoid
+#   ruido    = Noisemove (puntos que se mueven por todo el círculo) · chispas = Freqpixels · ondas = Ripple Peak · blur = Blurz
 #   puntitos = fondo suave + dos puntitos girando en cada anillo, como en las órbitas
 #
 # Valores: un escalar vale para todo el grupo; una lista da un valor por anillo en orden
@@ -30,7 +30,7 @@ paleta = "rojo-magenta"
 color = "rojo"
 grandes = { fx = "Freqpixels", sx = 120, ix = 40 }
 chicos = { fx = "Freqpixels", sx = 120, ix = 40 }
-diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+diana = { fx = "Freqpixels", sx = 120, ix = 40, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }   # chispas por anillo
 
 [[look]]
 id = 12
@@ -95,7 +95,7 @@ paleta = "rojo-azul"
 color = "rojo"
 grandes = { fx = "Blurz", sx = 120, ix = 120 }
 chicos = { fx = "Blurz", sx = 120, ix = 120 }
-diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "rojo", "azul", "rojo"] }
+diana = { fx = "Blurz", sx = 120, ix = 120, paleta = "color1", colores = ["azul", "rojo", "azul", "rojo"] }
 
 [[look]]
 id = 19
@@ -119,7 +119,7 @@ paleta = "colors-only"
 color = ["azul", "celeste", "azul"]
 grandes = { fx = "Gravcenter", sx = 160, ix = 150 }
 chicos = { fx = ["Puddlepeak", "Ripple Peak", "Puddlepeak"], sx = 160, ix = 150, c1 = 8 }
-diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "celeste", "azul", "celeste"] }
+diana = { fx = "Ripple Peak", sx = 128, ix = [32, 48, 64, 80], paleta = "color1", colores = ["azul", "celeste", "azul", "celeste"] }
 
 [[look]]
 id = 1
