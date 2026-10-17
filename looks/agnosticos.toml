@@ -3,7 +3,9 @@
 #   (texturas, puntos que recorren el anillo, puntitos orbitando). Sin Gravcentric (punta gris) ni Waterfall (verde pálido).
 # DIANA: efectos que resaltan los 4 círculos concéntricos, un segmento por anillo (D1 centro .. D4 afuera).
 #   cierre   = Gravcenter por anillo: cada círculo se cierra con el volumen, el centro es el más sensible
+#              (ojo: crece en U desde la mitad de cada tira, así que depende de dónde arranca)
 #   textura  = Plasmoid por anillo con colores alternados: siempre se leen los 4 círculos
+#   ruido    = Noisemove por anillo con colores alternados: puntos que se mueven por todo el círculo
 #   puntitos = fondo suave + dos puntitos girando en cada anillo, como en las órbitas
 #
 # Valores: un escalar vale para todo el grupo; una lista da un valor por anillo en orden
@@ -46,7 +48,7 @@ paleta = "magenta-azul"
 color = "magenta"
 grandes = { fx = "Plasmoid", sx = 90, ix = 90 }
 chicos = { fx = "Juggles", sx = 140, ix = 110 }
-diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["azul", "magenta", "azul", "magenta"] }
+diana = { fx = "Plasmoid", sx = 90, ix = 90, paleta = "color1", colores = ["azul", "magenta", "azul", "magenta"] }   # textura, igual que los grandes
 
 [[look]]
 id = 14
@@ -75,7 +77,7 @@ paleta = "rojo-magenta"
 color = "rojo"
 grandes = { fx = "Noisemove", sx = 140, ix = 255 }
 chicos = { fx = "Noisemove", sx = 170, ix = 255 }
-diana = { fx = "Gravcenter", sx = 128, ix = [200, 170, 140, 110], paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }
+diana = { fx = "Noisemove", sx = [200, 170, 140, 110], ix = 255, paleta = "color1", colores = ["rojo", "magenta", "rojo", "magenta"] }   # los mismos puntos de ruido que las órbitas
 
 [[look]]
 id = 17
